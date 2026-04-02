@@ -15,14 +15,14 @@
 
 * {
     margin: 0; padding: 0; box-sizing: border-box;
-    cursor: url('assists/BackGrounds/mouse%20cursor.gif'), auto;
+    cursor: url('assists/BackGrounds/mousecursor.gif'), auto;
 }
 
 body { font-family: 'Poppins', sans-serif; color: #fff; background-color: var(--bg-base); overflow-x: hidden; line-height: 1.6; }
 h1, h2, h3, .logo { font-family: 'Outfit', sans-serif; }
 
 /* Dynamic Background */
-.background-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-image: url('assists/BackGrounds/background%20.gif'); background-size: cover; background-position: center; transition: filter 0.8s ease-in-out; filter: brightness(0.6); }
+.background-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background-image: url('assists/BackGrounds/background.gif'); background-size: cover; background-position: center; transition: filter 0.8s ease-in-out; filter: brightness(0.6); }
 .background-overlay.blurred { filter: brightness(0.4) blur(10px); }
 .noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: url('https://grainy-gradients.vercel.app/noise.svg'); opacity: 0.25; pointer-events: none; mix-blend-mode: overlay; }
 
