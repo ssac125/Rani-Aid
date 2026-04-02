@@ -1,3 +1,6 @@
+// Force reset assets so the new image links take effect
+localStorage.removeItem('rani_assets');
+
 // LocalStorage Pseudo-Backend Database Definition
 if (!localStorage.getItem('rani_assets')) {
     localStorage.setItem('rani_assets', JSON.stringify([
@@ -5,9 +8,12 @@ if (!localStorage.getItem('rani_assets')) {
         { id: 2, name: "The Giant", category: "sprite", url: "assists/sprites/theGiant.gif", rarity: "legendary", creatorCode: "isacxisac@gmail.com" },
         { id: 3, name: "Stone Beast", category: "sprite", url: "assists/sprites/StoneBeast.gif", rarity: "rare", creatorCode: "isacxisac@gmail.com" },
         { id: 4, name: "The Witch", category: "sprite", url: "assists/sprites/TheWitch.gif", rarity: "epic", creatorCode: "isacxisac@gmail.com" },
-        { id: 5, name: "Blue Storm", category: "effect", url: "assists/effects/Blue%20storm.gif", rarity: "legendary", creatorCode: "isacxisac@gmail.com" },
-        { id: 6, name: "Energy Explode", category: "effect", url: "assists/effects/Energy%20explode.gif", rarity: "rare", creatorCode: "isacxisac@gmail.com" },
-        { id: 7, name: "Respawn", category: "effect", url: "assists/effects/Respwan%20.gif", rarity: "epic", creatorCode: "isacxisac@gmail.com" }
+        { id: 5, name: "Dragon", category: "sprite", url: "assists/sprites/dragon.gif", rarity: "legendary", creatorCode: "isacxisac@gmail.com" },
+        { id: 6, name: "The Chaman", category: "sprite", url: "assists/sprites/TheChaman.gif", rarity: "epic", creatorCode: "isacxisac@gmail.com" },
+        { id: 7, name: "Thunder", category: "sprite", url: "assists/sprites/thunder.gif", rarity: "rare", creatorCode: "isacxisac@gmail.com" },
+        { id: 8, name: "Blue Storm", category: "effect", url: "assists/effects/Bluestorm.gif", rarity: "legendary", creatorCode: "isacxisac@gmail.com" },
+        { id: 9, name: "Energy Explode", category: "effect", url: "assists/effects/Energyexplode.gif", rarity: "rare", creatorCode: "isacxisac@gmail.com" },
+        { id: 10, name: "Respawn", category: "effect", url: "assists/effects/Respawn.gif", rarity: "epic", creatorCode: "isacxisac@gmail.com" }
     ]));
 }
 
