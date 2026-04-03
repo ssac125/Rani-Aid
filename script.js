@@ -1,7 +1,4 @@
-// Force reset assets so the new image links take effect
-localStorage.removeItem('rani_assets');
-
-// LocalStorage Pseudo-Backend Database Definition
+// LocalStorage Pseudo-Backend For ASSETS ONLY
 if (!localStorage.getItem('rani_assets')) {
     localStorage.setItem('rani_assets', JSON.stringify([
         { id: 1, name: "Cyber Beast", category: "sprite", url: "assists/sprites/CyberBeast.gif", rarity: "epic", creatorCode: "isacxisac@gmail.com" },
@@ -17,45 +14,68 @@ if (!localStorage.getItem('rani_assets')) {
     ]));
 }
 
-if (!localStorage.getItem('rani_users')) {
-    localStorage.setItem('rani_users', JSON.stringify([
-        { email: "isacxisac@gmail.com", password: "admin", role: "owner", lastActive: Date.now() }
-    ]));
-}
-
-if (!localStorage.getItem('rani_messages')) {
-    // Schema: { id, sender, receiver, type, url, text, timestamp, status: 'PENDING' | 'ACTIVE' | 'REJECTED' }
-    localStorage.setItem('rani_messages', JSON.stringify([]));
-}
-
 if (!localStorage.getItem('rani_vip_codes')) {
     localStorage.setItem('rani_vip_codes', JSON.stringify(["isaac1ftw"]));
 }
 
-// Variables
+// Global Variables
 let currentUser = JSON.parse(sessionStorage.getItem('current_user')) || null;
 let isSignupMode = false;
 let activeChatClient = null;
 let currentServiceItem = null;
 
+// ==========================================
+// FIREBASE REAL-TIME SYNCING
+// ==========================================
+window.addEventListener('firebaseReady', () => {
+    // 1. Listen to all USERS in the cloud
+    window.fbOnSnapshot(window.fbCollection(window.firebaseDB, "users"), (snapshot) => {
+        let liveUsers = [];
+        snapshot.forEach(doc => liveUsers.push(doc.data()));
+        localStorage.setItem('rani_users', JSON.stringify(liveUsers)); // Keep a local copy for quick rendering
+        
+        if(currentUser && currentUser.role === 'owner') window.loadAdminMonitor();
+        const win = document.getElementById('vip-inbox-window');
+        if(win && !win.classList.contains('hidden')) window.loadVIPInbox();
+    });
+
+    // 2. Listen to all MESSAGES in the cloud
+    const q = window.fbQuery(window.fbCollection(window.firebaseDB, "messages"), window.fbOrderBy("timestamp", "asc"));
+    window.fbOnSnapshot(q, (snapshot) => {
+        let liveMessages = [];
+        snapshot.forEach(doc => {
+            liveMessages.push({ ...doc.data(), fbDocId: doc.id }); // Save Firebase Document ID so we can edit it later
+        });
+        localStorage.setItem('rani_messages', JSON.stringify(liveMessages));
+
+        // When a new message comes in, refresh the UI automatically!
+        if(currentUser) {
+            checkPendingRequests();
+            window.loadServiceStation();
+            const win = document.getElementById('vip-inbox-window');
+            if(win && !win.classList.contains('hidden')) window.loadVIPInbox();
+        }
+    });
+});
+
+
 const pingOnlineStatus = () => {
     if(!currentUser) return;
-    const users = JSON.parse(localStorage.getItem('rani_users')) || [];
-    const idx = users.findIndex(u => u.email === currentUser.email);
-    if(idx > -1) {
-        users[idx].lastActive = Date.now();
-        localStorage.setItem('rani_users', JSON.stringify(users));
-        currentUser.lastActive = users[idx].lastActive;
-        sessionStorage.setItem('current_user', JSON.stringify(currentUser));
-        
-        checkPendingRequests();
-        if(currentUser.role === 'owner') window.loadAdminMonitor();
+    currentUser.lastActive = Date.now();
+    sessionStorage.setItem('current_user', JSON.stringify(currentUser));
+    
+    // Update Firebase online status
+    if(window.firebaseDB) {
+        const emailSafe = currentUser.email.replace(/[^a-zA-Z0-9]/g, '');
+        window.fbSetDoc(window.fbDoc(window.firebaseDB, "users", emailSafe), currentUser, { merge: true });
     }
 };
 setInterval(pingOnlineStatus, 10000);
 pingOnlineStatus();
 
-// Setup GUI
+// ==========================================
+// GUI & LOGIC
+// ==========================================
 const loadAssets = () => {
     const assets = JSON.parse(localStorage.getItem('rani_assets'));
     const spritesTrack = document.getElementById('sprites-track');
@@ -67,9 +87,7 @@ const loadAssets = () => {
     assets.forEach(asset => {
         const cardHtml = `
             <div class="asset-card rng-${asset.rarity}">
-                <div class="asset-preview">
-                    <img src="${asset.url}" alt="${asset.name}">
-                </div>
+                <div class="asset-preview"><img src="${asset.url}" alt="${asset.name}"></div>
                 <div class="asset-info">
                     <h3>${asset.name}</h3>
                     <div style="margin: 10px 0;">
@@ -111,12 +129,12 @@ const updateUI = () => {
             }
             vipIcon.classList.remove('hidden');
             document.getElementById('nav-vip').classList.remove('hidden');
-            if(beCreatorBtn) beCreatorBtn.classList.add('hidden'); // Hide Be Creator if already VIP
+            if(beCreatorBtn) beCreatorBtn.classList.add('hidden');
         } else {
             badge.style.background = '#555';
             vipIcon.classList.add('hidden');
             document.getElementById('nav-vip').classList.add('hidden');
-            if(beCreatorBtn) beCreatorBtn.classList.remove('hidden'); // Show for normal users
+            if(beCreatorBtn) beCreatorBtn.classList.remove('hidden');
         }
 
         document.getElementById('nav-inbox').classList.remove('hidden');
@@ -130,7 +148,7 @@ const updateUI = () => {
         
         floatTrigger.classList.add('hidden');
         document.getElementById('vip-inbox-window').classList.add('hidden');
-        if(beCreatorBtn) beCreatorBtn.classList.remove('hidden'); // Show for non-logged in users
+        if(beCreatorBtn) beCreatorBtn.classList.remove('hidden'); 
     }
 };
 
@@ -162,7 +180,7 @@ document.querySelectorAll('.slider-container').forEach(c => {
     if(n) n.addEventListener('click', () => track.scrollBy({ left: 300, behavior: 'smooth'}));
 });
 
-// Header Icon "Be Creator" Logic
+// "Be Creator" Logic
 const btnBeCreator = document.getElementById('btn-be-creator');
 const creatorModal = document.getElementById('creator-modal');
 if(btnBeCreator) {
@@ -175,7 +193,6 @@ if(document.getElementById('close-creator')) {
     document.getElementById('close-creator').addEventListener('click', () => creatorModal.style.display = 'none');
 }
 
-// Modal VIP Activation Logic
 const btnModalActivate = document.getElementById('btn-modal-activate');
 if(btnModalActivate) {
     btnModalActivate.addEventListener('click', () => {
@@ -186,9 +203,12 @@ if(btnModalActivate) {
         if(codes.includes(code)) {
             currentUser.role = "vip";
             sessionStorage.setItem('current_user', JSON.stringify(currentUser));
-            const users = JSON.parse(localStorage.getItem('rani_users'));
-            const idx = users.findIndex(u => u.email === currentUser.email);
-            if(idx > -1) { users[idx].role = 'vip'; localStorage.setItem('rani_users', JSON.stringify(users)); }
+            
+            // Sync new VIP role to Firebase
+            if(window.firebaseDB) {
+                const emailSafe = currentUser.email.replace(/[^a-zA-Z0-9]/g, '');
+                window.fbSetDoc(window.fbDoc(window.firebaseDB, "users", emailSafe), currentUser, { merge: true });
+            }
             
             msg.textContent = "VIP PASSKEY GRANTED! You are now a Creator."; 
             msg.style.color="#00ff88";
@@ -202,7 +222,7 @@ if(btnModalActivate) {
     });
 }
 
-// Authentication
+// Authentication Sync to Firebase
 if(document.getElementById('btn-login-modal')) document.getElementById('btn-login-modal').addEventListener('click', () => document.getElementById('auth-modal').style.display = 'flex');
 if(document.querySelector('#auth-modal .close-modal')) document.querySelector('#auth-modal .close-modal').addEventListener('click', () => document.getElementById('auth-modal').style.display = 'none');
 
@@ -220,24 +240,28 @@ if(document.getElementById('auth-form')) {
         e.preventDefault();
         const em = document.getElementById('auth-email').value;
         const pw = document.getElementById('auth-password').value;
-        const users = JSON.parse(localStorage.getItem('rani_users'));
+        const users = JSON.parse(localStorage.getItem('rani_users') || '[]');
         const err = document.getElementById('auth-error');
 
         if(isSignupMode) {
             if(users.find(u => u.email === em)) { err.textContent = "Email used."; return; }
             currentUser = { email: em, password: pw, role: "user", lastActive: Date.now() };
-            users.push(currentUser);
-            localStorage.setItem('rani_users', JSON.stringify(users));
+            
+            // Push new user to Firebase
+            if(window.firebaseDB) {
+                const emailSafe = em.replace(/[^a-zA-Z0-9]/g, '');
+                window.fbSetDoc(window.fbDoc(window.firebaseDB, "users", emailSafe), currentUser);
+            }
         } else {
             const f = users.find(u => u.email === em && u.password === pw);
             if(!f) { err.textContent = "Invalid details."; return; }
             currentUser = f;
+            pingOnlineStatus(); // Update last active in Firebase
         }
 
         sessionStorage.setItem('current_user', JSON.stringify(currentUser));
         document.getElementById('auth-modal').style.display = 'none';
         updateUI();
-        pingOnlineStatus();
     });
 }
 
@@ -250,7 +274,7 @@ if(document.getElementById('btn-logout')) {
     });
 }
 
-// "Ask for Service" -> Jump Modal Logic
+// "Ask for Service" Modal Logic
 window.openServiceModal = (item) => {
     if(!currentUser) return alert("Please Sign In first so creators can reach you!");
     currentServiceItem = item;
@@ -263,7 +287,7 @@ document.getElementById('btn-next-jump')?.addEventListener('click', () => {
     const jm = document.getElementById('vip-jump-modal');
     jm.style.display = 'flex';
     
-    const users = JSON.parse(localStorage.getItem('rani_users'));
+    const users = JSON.parse(localStorage.getItem('rani_users') || '[]');
     const assets = JSON.parse(localStorage.getItem('rani_assets'));
     const vips = users.filter(u => u.role === 'vip' || u.role === 'owner');
     
@@ -295,10 +319,7 @@ if(document.getElementById('close-jump')) document.getElementById('close-jump').
 
 window.sendJumpRequest = (targetVipEmail) => {
     document.getElementById('vip-jump-modal').style.display = 'none';
-    
-    const msgId = 'req_' + Date.now();
     saveMsg({ 
-        id: msgId,
         sender: currentUser.email, 
         receiver: targetVipEmail, 
         type: 'text', 
@@ -344,9 +365,7 @@ document.getElementById('upload-form')?.addEventListener('submit', (e) => {
 });
 
 
-// ---------------------------------------------------------------------------------
 // Admin Monitor logic
-// ---------------------------------------------------------------------------------
 window.loadAdminMonitor = () => {
     if(!currentUser || currentUser.role !== 'owner') return;
     const users = JSON.parse(localStorage.getItem('rani_users') || '[]');
@@ -374,10 +393,9 @@ window.loadAdminMonitor = () => {
 };
 
 
-// ---------------------------------------------------------------------------------
-// Service Station & Inbox Logic (Request Queue + Accept/Reject)
-// ---------------------------------------------------------------------------------
-
+// =======================================================
+// Chat Logic & Real-time message dispatching
+// =======================================================
 const checkPendingRequests = () => {
     if(!currentUser) return;
     const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
@@ -444,25 +462,26 @@ window.loadServiceStation = () => {
     renderChatCore('station');
 };
 
-window.handleRequest = (senderEmail, action) => {
-    let msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
+window.handleRequest = async (senderEmail, action) => {
+    const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
+    
     if(action === 'ACCEPT') {
+        // Send updates to Firebase
         msgList.forEach(m => {
             if(m.sender === senderEmail && m.receiver === currentUser.email && m.status === 'PENDING') {
-                m.status = 'ACTIVE';
+                if(m.fbDocId && window.firebaseDB) window.fbUpdateDoc(window.fbDoc(window.firebaseDB, "messages", m.fbDocId), { status: 'ACTIVE' });
             }
         });
-        localStorage.setItem('rani_messages', JSON.stringify(msgList));
         activeChatClient = senderEmail;
         saveMsg({sender: currentUser.email, receiver: senderEmail, type:'text', text:'I have accepted your request! Let us discuss the details.', timestamp: Date.now(), status:'ACTIVE'});
     } else {
-        msgList = msgList.filter(m => !(m.sender === senderEmail && m.receiver === currentUser.email && m.status === 'PENDING'));
-        localStorage.setItem('rani_messages', JSON.stringify(msgList));
+        // Delete pending requests in Firebase
+        msgList.forEach(m => {
+            if(m.sender === senderEmail && m.receiver === currentUser.email && m.status === 'PENDING') {
+                if(m.fbDocId && window.firebaseDB) window.fbDeleteDoc(window.fbDoc(window.firebaseDB, "messages", m.fbDocId));
+            }
+        });
     }
-    
-    window.loadServiceStation();
-    window.loadVIPInbox();
-    pingOnlineStatus();
 };
 
 window.selectSsClient = (email) => {
@@ -544,13 +563,12 @@ const handleDbInput = (e, inputId) => {
     inpTag.value = "";
 };
 
-const saveMsg = (msgObj) => {
-    const list = JSON.parse(localStorage.getItem('rani_messages'));
-    list.push(msgObj);
-    localStorage.setItem('rani_messages', JSON.stringify(list));
-    window.loadServiceStation();
-    if (document.getElementById('vip-inbox-window') && !document.getElementById('vip-inbox-window').classList.contains('hidden')) {
-        window.loadVIPInbox();
+const saveMsg = async (msgObj) => {
+    if(window.firebaseDB) {
+        try {
+            await window.fbAddDoc(window.fbCollection(window.firebaseDB, "messages"), msgObj);
+            // We no longer need to call window.loadVIPInbox manually because onSnapshot does it automatically!
+        } catch(e) { console.error("Error sending message to Firebase:", e); }
     }
 };
 
