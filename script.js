@@ -48,7 +48,6 @@ const pingOnlineStatus = () => {
         currentUser.lastActive = users[idx].lastActive;
         sessionStorage.setItem('current_user', JSON.stringify(currentUser));
         
-        // Notify badge updating & admin panels
         checkPendingRequests();
         if(currentUser.role === 'owner') window.loadAdminMonitor();
     }
@@ -101,8 +100,6 @@ const updateUI = () => {
         const vipIcon = document.getElementById('global-vip-badge');
         
         badge.textContent = currentUser.role.toUpperCase();
-        
-        // EVERYONE gets the floating chat trigger now
         floatTrigger.classList.remove('hidden');
 
         if (currentUser.role === 'owner' || currentUser.role === 'vip') {
@@ -133,7 +130,7 @@ const updateUI = () => {
         
         floatTrigger.classList.add('hidden');
         document.getElementById('vip-inbox-window').classList.add('hidden');
-        if(beCreatorBtn) beCreatorBtn.classList.remove('hidden'); // Show for non-logged in users so they can click and be told to sign in
+        if(beCreatorBtn) beCreatorBtn.classList.remove('hidden'); // Show for non-logged in users
     }
 };
 
@@ -165,7 +162,7 @@ document.querySelectorAll('.slider-container').forEach(c => {
     if(n) n.addEventListener('click', () => track.scrollBy({ left: 300, behavior: 'smooth'}));
 });
 
-// "Be Creator" Floating Button Logic
+// Header Icon "Be Creator" Logic
 const btnBeCreator = document.getElementById('btn-be-creator');
 const creatorModal = document.getElementById('creator-modal');
 if(btnBeCreator) {
@@ -204,7 +201,6 @@ if(btnModalActivate) {
         }
     });
 }
-
 
 // Authentication
 if(document.getElementById('btn-login-modal')) document.getElementById('btn-login-modal').addEventListener('click', () => document.getElementById('auth-modal').style.display = 'flex');
@@ -267,7 +263,6 @@ document.getElementById('btn-next-jump')?.addEventListener('click', () => {
     const jm = document.getElementById('vip-jump-modal');
     jm.style.display = 'flex';
     
-    // Populate Grid
     const users = JSON.parse(localStorage.getItem('rani_users'));
     const assets = JSON.parse(localStorage.getItem('rani_assets'));
     const vips = users.filter(u => u.role === 'vip' || u.role === 'owner');
@@ -279,7 +274,6 @@ document.getElementById('btn-next-jump')?.addEventListener('click', () => {
         const lastSeenStr = isOnline ? "Online Now" : (timeDiff > 1440 ? "Offline" : `Active ${timeDiff}m ago`);
         const dotClass = isOnline ? '' : 'offline';
         
-        // Get up to 3 of their works
         const vWorks = assets.filter(a => a.creatorCode === v.email).slice(0,3);
         const imagesHtml = vWorks.map(w => `<img src="${w.url}" class="vcard-img" title="${w.name}">`).join('');
 
@@ -302,7 +296,6 @@ if(document.getElementById('close-jump')) document.getElementById('close-jump').
 window.sendJumpRequest = (targetVipEmail) => {
     document.getElementById('vip-jump-modal').style.display = 'none';
     
-    // Create PENDING request message
     const msgId = 'req_' + Date.now();
     saveMsg({ 
         id: msgId,
@@ -316,7 +309,7 @@ window.sendJumpRequest = (targetVipEmail) => {
     
     alert("Request has been sent. Please wait until they reply...");
     activeChatClient = targetVipEmail;
-    switchTab('inbox'); // Send client to service station to wait
+    switchTab('inbox');
 };
 
 // Admin Addons Base64 Upload
@@ -361,7 +354,7 @@ window.loadAdminMonitor = () => {
     if(!grid) return;
     
     grid.innerHTML = users.map(u => {
-        if(u.email === currentUser.email) return ''; // exclude self
+        if(u.email === currentUser.email) return '';
         const isOnline = (Date.now() - u.lastActive) < 60000;
         const timeDiff = Math.floor((Date.now() - u.lastActive) / 60000);
         const lastSeenStr = isOnline ? "Online Now" : (timeDiff > 1440 ? "Offline" : `Active ${timeDiff}m ago`);
@@ -388,7 +381,6 @@ window.loadAdminMonitor = () => {
 const checkPendingRequests = () => {
     if(!currentUser) return;
     const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
-    // Only check if we are receiver and status is pending
     const pending = msgList.filter(m => m.receiver === currentUser.email && m.status === 'PENDING');
     
     const floatBadge = document.querySelector('.notification-badge');
@@ -403,7 +395,6 @@ window.loadServiceStation = () => {
     const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
     const users = JSON.parse(localStorage.getItem('rani_users') || '[]');
     
-    // Load Pending Requests into Queue (If We are VIP/Owner)
     const pendingList = msgList.filter(m => m.receiver === currentUser.email && m.status === 'PENDING');
     let queueHTML = '';
     
@@ -427,7 +418,6 @@ window.loadServiceStation = () => {
     if(queueHTML === '') queueHTML = '<div style="padding:10px; color:#555; text-align:center;">No requests in queue.</div>';
     document.getElementById('ss-queue-list').innerHTML = queueHTML;
 
-    // Load Active Client Selection in far left Server Bar
     let contacts = new Set();
     msgList.forEach(m => {
         if(m.status === 'ACTIVE') {
@@ -451,7 +441,6 @@ window.loadServiceStation = () => {
     });
     document.getElementById('ss-client-list').innerHTML = navHTML;
 
-    // Render active chat
     renderChatCore('station');
 };
 
@@ -465,10 +454,8 @@ window.handleRequest = (senderEmail, action) => {
         });
         localStorage.setItem('rani_messages', JSON.stringify(msgList));
         activeChatClient = senderEmail;
-        // Broadcast automated acceptance
         saveMsg({sender: currentUser.email, receiver: senderEmail, type:'text', text:'I have accepted your request! Let us discuss the details.', timestamp: Date.now(), status:'ACTIVE'});
     } else {
-        // Rejecting simply deletes the pending request
         msgList = msgList.filter(m => !(m.sender === senderEmail && m.receiver === currentUser.email && m.status === 'PENDING'));
         localStorage.setItem('rani_messages', JSON.stringify(msgList));
     }
@@ -484,7 +471,7 @@ window.selectSsClient = (email) => {
     window.loadVIPInbox();
 };
 
-const renderChatCore = (targetPrefix) => { // 'station' or 'floating'
+const renderChatCore = (targetPrefix) => { 
     const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
     let box;
     if(targetPrefix === 'station') box = document.getElementById('station-messages');
@@ -494,7 +481,6 @@ const renderChatCore = (targetPrefix) => { // 'station' or 'floating'
     if (activeChatClient) {
         if(targetPrefix==='station') document.getElementById('station-title').textContent = activeChatClient.split('@')[0];
         
-        // Find if request is still PENDING
         const pendingForMe = msgList.find(m => m.sender === activeChatClient && m.receiver === currentUser.email && m.status === 'PENDING');
         const pendingForThem = msgList.find(m => m.sender === currentUser.email && m.receiver === activeChatClient && m.status === 'PENDING');
         
@@ -513,7 +499,6 @@ const renderChatCore = (targetPrefix) => { // 'station' or 'floating'
                 (m.receiver === activeChatClient && m.sender === currentUser.email)
             ).filter(m => m.status === 'ACTIVE');
 
-            // Construct Bubbles
             if(targetPrefix === 'station') {
                 box.innerHTML = convo.map(m => {
                     const tE = m.sender.split('@')[0]; let contentHtml = '';
@@ -530,7 +515,6 @@ const renderChatCore = (targetPrefix) => { // 'station' or 'floating'
                         </div>`;
                 }).join('');
             } else {
-                // Floating Inbox Bubbles
                 box.innerHTML = convo.map(m => {
                     const isMe = m.sender === currentUser.email;
                     let contentHtml = '';
@@ -548,7 +532,6 @@ const renderChatCore = (targetPrefix) => { // 'station' or 'floating'
     box.scrollTop = box.scrollHeight;
 };
 
-// Messaging Inputs Combine
 document.getElementById('station-form')?.addEventListener('submit', (e) => handleDbInput(e, 'station-input'));
 document.getElementById('floating-form')?.addEventListener('submit', (e) => handleDbInput(e, 'floating-input'));
 
@@ -571,7 +554,6 @@ const saveMsg = (msgObj) => {
     }
 };
 
-// VIP Floating Inbox Logic (Draggable mechanics)
 const floatTrig = document.getElementById('vip-floating-trigger');
 const vipWin = document.getElementById('vip-inbox-window');
 const vipHead = document.getElementById('vip-inbox-header');
@@ -592,7 +574,6 @@ window.dockInbox = (pos) => {
     if(pos==='right'){ vipWin.style.right = '0px'; vipWin.style.left = 'auto'; }
 };
 
-// Dragging Math
 if(vipHead) {
     let isDragging = false, startX, startY, startLeft, startTop;
     vipHead.addEventListener('mousedown', (e) => {
@@ -600,9 +581,9 @@ if(vipHead) {
         startX = e.clientX; startY = e.clientY;
         const rect = vipWin.getBoundingClientRect();
         startLeft = rect.left; startTop = rect.top;
-        vipWin.style.right = 'auto'; // Break CSS right positioning so left overrides
+        vipWin.style.right = 'auto';
         vipWin.style.bottom = 'auto';
-        vipWin.style.height = '500px'; // Unsnap if docked
+        vipWin.style.height = '500px';
         vipWin.style.borderRadius = '16px';
     });
     document.addEventListener('mousemove', (e) => {
@@ -615,20 +596,17 @@ if(vipHead) {
     document.addEventListener('mouseup', () => { isDragging = false; });
 }
 
-// Rewritten Instagram-Style Direct Box Logic
 window.loadVIPInbox = () => {
-    if(!currentUser) return; // Works for ALL logged in users now
+    if(!currentUser) return;
     const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
     const users = JSON.parse(localStorage.getItem('rani_users') || '[]');
     
     let contacts = new Set();
 
-    // 1. Force populate all VIPs/Creators (so anyone can select them to chat)
     users.filter(u => u.role === 'vip' || u.role === 'owner').forEach(v => {
         if(v.email !== currentUser.email) contacts.add(v.email);
     });
 
-    // 2. Add anyone you have previously chatted with
     msgList.filter(m => m.status === 'ACTIVE').forEach(m => {
         if(m.sender === currentUser.email) contacts.add(m.receiver);
         if(m.receiver === currentUser.email) contacts.add(m.sender);
@@ -636,7 +614,6 @@ window.loadVIPInbox = () => {
 
     const clientArr = Array.from(contacts);
     
-    // Sort logic: Online users appear at the top
     clientArr.sort((a, b) => {
         const ua = users.find(u => u.email === a);
         const ub = users.find(u => u.email === b);
@@ -672,7 +649,6 @@ window.loadVIPInbox = () => {
     checkPendingRequests();
 };
 
-// Inbox specific files and voices
 const ibxPic = document.getElementById('floating-btn-pic');
 const ibxFile = document.getElementById('floating-file');
 const ibxVoice = document.getElementById('floating-btn-voice');
@@ -695,13 +671,11 @@ if(ibxVoice) {
         rec = true; ibxVoice.style.color = "#ff4444";
         setTimeout(() => {
             saveMsg({ sender: currentUser.email, receiver: activeChatClient, type: 'audio', timestamp: Date.now(), status:'ACTIVE' });
-            ibxVoice.style.color = "#a0a0b0"; rec = false;
+            ibxVoice.style.color = "#fff"; rec = false;
         }, 1500);
     });
 }
 
-
-// Shared File Upload for Service Station
 const btnPic = document.getElementById('db-btn-pic');
 const fileInp = document.getElementById('db-file-upload');
 if(btnPic && fileInp) {
