@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rani Aid | VIP Services</title>
     <meta name="description" content="Request custom VFX and sprites from VIP Creators.">
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -17,7 +17,6 @@
 
     <header class="header">
         <nav class="nav-container">
-            <!-- Wrapped Logo and new Be Creator Icon in a flex container -->
             <div style="display:flex; align-items:center; gap: 10px;">
                 <div class="logo">Rani Aid</div>
                 <button id="btn-be-creator" class="creator-icon-btn hidden" title="Become a VIP Creator">
@@ -48,13 +47,11 @@
     </header>
 
     <main class="content-wrapper">
-        <!-- Home Section -->
         <section id="home" class="tab-content active">
             <div class="hero">
                 <h1 class="hero-title">Hire Legendary <span>Creators</span></h1>
                 <p class="hero-subtitle">Browse portfolios of high-quality sprites and VFX effects, and request custom work directly.</p>
                 
-                <!-- Clean Information Area -->
                 <div class="payment-overview glowing-box" style="margin-top:4rem; background: transparent; box-shadow: none; border-color: rgba(255,255,255,0.05);">
                     <h3 style="color:#a0a0b0; margin-bottom: 1rem; font-family:'Poppins', sans-serif; font-weight:400;">Secure Payment Methods</h3>
                     <div class="payment-cards-preview">
@@ -69,7 +66,6 @@
             </div>
         </section>
 
-        <!-- Sprites Section -->
         <section id="sprites" class="tab-content">
             <div class="section-header">
                 <h2 class="section-title">Sprites <span>Portfolio</span></h2>
@@ -81,7 +77,6 @@
             </div>
         </section>
 
-        <!-- Effects Section -->
         <section id="effects" class="tab-content">
             <div class="section-header">
                 <h2 class="section-title">VFX <span>Portfolio</span></h2>
@@ -93,7 +88,6 @@
             </div>
         </section>
 
-        <!-- VIP Addons Section -->
         <section id="vip-addons" class="tab-content hidden-tab admin-only">
             <div class="section-header">
                 <h2 class="section-title">Addons <span>Hub</span></h2>
@@ -138,10 +132,8 @@
             </div>
         </section>
 
-        <!-- Service Station (Discord Style / Request Queue) -->
         <section id="inbox" class="tab-content hidden-tab">
             <div class="service-station-discord">
-                
                 <div class="ss-servers">
                     <div class="ss-circle-icon active"><i class="ph-fill ph-planet"></i></div>
                     <div class="ss-divider"></div>
@@ -152,9 +144,7 @@
                     <div class="ss-channel-header">
                         <h3>Job Requests (Queue)</h3>
                     </div>
-                    <div id="ss-queue-list" class="ss-dm-container">
-                        <!-- Populated with pending + active requests -->
-                    </div>
+                    <div id="ss-queue-list" class="ss-dm-container"></div>
                 </div>
 
                 <div class="ss-main">
@@ -179,26 +169,21 @@
             </div>
         </section>
 
-        <!-- Admin Monitor (Owner Only) -->
         <section id="monitor" class="tab-content hidden-tab">
             <div class="section-header">
                 <h2 class="section-title" style="color:#f5576c;">Client <span>Monitor</span></h2>
                 <p>Global view of all registered clients and their live online status.</p>
             </div>
             <div class="glowing-box" style="max-width:1000px; margin-top:2rem;">
-                <div class="vip-grid-list" id="client-monitor-list">
-                    <!-- Populated by JS -->
-                </div>
+                <div class="vip-grid-list" id="client-monitor-list"></div>
             </div>
         </section>
     </main>
 
-    <!-- Global Copyright Tracker -->
     <div class="copyright-footer">
         © All saved rights by isaak
     </div>
 
-    <!-- Floating Trigger Cluster (Instagram + VIP Inbox) -->
     <div class="bottom-right-cluster">
         <a href="https://instagram.com/is1akft" target="_blank" class="social-floating" title="My Instagram">
             <i class="ph-bold ph-instagram-logo"></i>
@@ -209,7 +194,6 @@
         </div>
     </div>
 
-    <!-- Draggable Window (Instagram Style DirectBox) -->
     <div id="vip-inbox-window" class="hidden">
         <div class="vip-inbox-header" id="vip-inbox-header">
             <div style="display:flex; align-items:center; gap:8px;">
@@ -223,9 +207,7 @@
         </div>
         
         <div class="vip-inbox-body">
-            <!-- Left sidebar inside the box for active DMs -->
             <div class="inbox-dm-list" id="floating-dm-list"></div>
-            <!-- Right side is actual chat -->
             <div class="inbox-chat-area">
                 <div class="inbox-messages" id="floating-messages"></div>
                 <div class="inbox-input-zone">
@@ -240,7 +222,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- Modals -->
     <div id="auth-modal" class="modal">
@@ -265,7 +246,6 @@
         </div>
     </div>
 
-    <!-- Be Creator Passkey Modal -->
     <div id="creator-modal" class="modal">
         <div class="modal-content glass">
             <div class="modal-header">
@@ -279,7 +259,6 @@
         </div>
     </div>
 
-    <!-- Service Ask Modal -->
     <div id="service-modal" class="modal">
         <div class="modal-content checkout-glass">
             <div class="modal-header">
@@ -295,7 +274,6 @@
         </div>
     </div>
 
-    <!-- The "Jump Request" VIP Selection Modal -->
     <div id="vip-jump-modal" class="modal">
         <div class="modal-content checkout-glass" style="max-width:800px;">
             <div class="modal-header">
@@ -303,11 +281,43 @@
                 <button class="close-modal" id="close-jump">&times;</button>
             </div>
             <p>Choose an active VIP creator to send your work request to.</p>
-            <div class="vip-grid-list" id="vip-grid-list">
-                <!-- Dynamically populated from JS -->
-            </div>
+            <div class="vip-grid-list" id="vip-grid-list"></div>
         </div>
     </div>
+
+    <!-- FIREBASE LIVE BACKEND INTEGRATION -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3rhAn85tAJjSbDX-5S77GCvZ-csM4wbU",
+            authDomain: "rani-aid-live.firebaseapp.com",
+            projectId: "rani-aid-live",
+            storageBucket: "rani-aid-live.firebasestorage.app",
+            messagingSenderId: "973183364894",
+            appId: "1:973183364894:web:e44c94feda153c865f630f",
+            measurementId: "G-1S9YGCGLD8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Expose Firebase functions globally so your script.js can use them
+        window.firebaseDB = db;
+        window.fbCollection = collection;
+        window.fbAddDoc = addDoc;
+        window.fbOnSnapshot = onSnapshot;
+        window.fbQuery = query;
+        window.fbOrderBy = orderBy;
+        window.fbDoc = doc;
+        window.fbSetDoc = setDoc;
+        window.fbUpdateDoc = updateDoc;
+        window.fbDeleteDoc = deleteDoc;
+
+        // Fire an event to tell script.js that the cloud is ready!
+        window.dispatchEvent(new Event('firebaseReady'));
+    </script>
 
     <script src="script.js"></script>
 </body>
