@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rani Aid | VIP Services</title>
     <meta name="description" content="Request custom VFX and sprites from VIP Creators.">
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=4">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -17,7 +17,13 @@
 
     <header class="header">
         <nav class="nav-container">
-            <div class="logo">Rani Aid</div>
+            <!-- Wrapped Logo and new Be Creator Icon in a flex container -->
+            <div style="display:flex; align-items:center; gap: 10px;">
+                <div class="logo">Rani Aid</div>
+                <button id="btn-be-creator" class="creator-icon-btn hidden" title="Become a VIP Creator">
+                    <i class="ph-bold ph-sparkle"></i>
+                </button>
+            </div>
             
             <ul class="nav-links">
                 <li class="nav-item" data-tab="sprites">Sprites</li>
@@ -192,11 +198,6 @@
         © All saved rights by isaak
     </div>
 
-    <!-- Bottom Left "Be Creator" Button -->
-    <div id="btn-be-creator" class="glass-btn-floating hidden">
-        <i class="ph-bold ph-sparkle"></i> Be Creator
-    </div>
-
     <!-- Floating Trigger Cluster (Instagram + VIP Inbox) -->
     <div class="bottom-right-cluster">
         <a href="https://instagram.com/is1akft" target="_blank" class="social-floating" title="My Instagram">
@@ -208,7 +209,7 @@
         </div>
     </div>
 
-    <!-- Draggable Window -->
+    <!-- Draggable Window (Instagram Style DirectBox) -->
     <div id="vip-inbox-window" class="hidden">
         <div class="vip-inbox-header" id="vip-inbox-header">
             <div style="display:flex; align-items:center; gap:8px;">
@@ -231,7 +232,7 @@
                     <button class="inbox-icon" id="floating-btn-pic"><i class="ph-bold ph-image"></i></button>
                     <button class="inbox-icon" id="floating-btn-gif"><i class="ph-bold ph-gif"></i></button>
                     <input type="file" id="floating-file" accept="image/*" style="display:none;">
-                    <form id="floating-form" style="flex:1; display:flex;">
+                    <form id="floating-form">
                         <input type="text" id="floating-input" placeholder="Message..." autocomplete="off">
                     </form>
                     <button class="inbox-icon" id="floating-btn-voice"><i class="ph-bold ph-microphone"></i></button>
