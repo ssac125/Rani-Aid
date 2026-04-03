@@ -13,10 +13,7 @@
     --transition: all 0.3s ease;
 }
 
-* {
-    margin: 0; padding: 0; box-sizing: border-box;
-    cursor: url('assists/background/mousecursor.gif'), auto;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; cursor: url('assists/background/mousecursor.gif'), auto; }
 
 body { font-family: 'Poppins', sans-serif; color: #fff; background-color: var(--bg-base); overflow-x: hidden; line-height: 1.6; }
 h1, h2, h3, .logo { font-family: 'Outfit', sans-serif; }
@@ -32,22 +29,8 @@ h1, h2, h3, .logo { font-family: 'Outfit', sans-serif; }
 .logo { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #fff 0%, #ff88aa 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
 
 /* New Header Icon Button for "Be Creator" */
-.creator-icon-btn {
-    background: transparent;
-    border: none;
-    color: rgba(255,255,255,0.6);
-    font-size: 1.5rem;
-    cursor: pointer !important;
-    border-radius: 50%;
-    width: 36px; height: 36px;
-    display: flex; justify-content: center; align-items: center;
-    transition: var(--transition);
-}
-.creator-icon-btn:hover {
-    color: var(--accent);
-    background: rgba(255,255,255,0.1);
-    transform: scale(1.1);
-}
+.creator-icon-btn { background: transparent; border: none; color: rgba(255,255,255,0.6); font-size: 1.5rem; cursor: pointer !important; border-radius: 50%; width: 36px; height: 36px; display: flex; justify-content: center; align-items: center; transition: var(--transition); }
+.creator-icon-btn:hover { color: var(--accent); background: rgba(255,255,255,0.1); transform: scale(1.1); }
 .creator-icon-btn.hidden { display: none !important; }
 
 .social-header { color: var(--accent); font-size: 1.2rem; display:flex; align-items:center; gap:5px; text-decoration:none; font-weight:bold; transition:var(--transition); }
