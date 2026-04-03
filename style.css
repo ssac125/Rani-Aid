@@ -31,6 +31,25 @@ h1, h2, h3, .logo { font-family: 'Outfit', sans-serif; }
 .nav-container { max-width: 1400px; margin: 0 auto; height: 100%; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; }
 .logo { font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #fff 0%, #ff88aa 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
 
+/* New Header Icon Button for "Be Creator" */
+.creator-icon-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-size: 1.5rem;
+    cursor: pointer !important;
+    border-radius: 50%;
+    width: 36px; height: 36px;
+    display: flex; justify-content: center; align-items: center;
+    transition: var(--transition);
+}
+.creator-icon-btn:hover {
+    color: var(--accent);
+    background: rgba(255,255,255,0.1);
+    transform: scale(1.1);
+}
+.creator-icon-btn.hidden { display: none !important; }
+
 .social-header { color: var(--accent); font-size: 1.2rem; display:flex; align-items:center; gap:5px; text-decoration:none; font-weight:bold; transition:var(--transition); }
 .social-header:hover { text-shadow: 0 0 10px #fff; transform:scale(1.05); }
 
@@ -73,11 +92,6 @@ input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 10px v
 .visa-mock i { color: #1a1f71; text-shadow: 0 0 5px #fff; }
 .paypal-mock i { color: #00457c; text-shadow: 0 0 5px #0079c1; }
 .baridi-mock i { color: #d32f2f; }
-
-/* Floating Be Creator Button */
-.glass-btn-floating { position: fixed; bottom: 30px; left: 30px; z-index: 9000; background: rgba(255,255,255,0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 12px 24px; color: #fff; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; cursor: pointer; transition: var(--transition); }
-.glass-btn-floating:hover { background: rgba(216, 87, 241, 0.2); border-color: var(--accent); box-shadow: 0 0 20px rgba(216, 87, 241, 0.4); transform: translateY(-3px); }
-.glass-btn-floating.hidden { display: none !important; }
 
 /* Sliders & Cards */
 .slider-container { display: flex; align-items: center; gap: 1rem; width: 100%; margin-top: 2rem; }
@@ -170,8 +184,10 @@ input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 10px v
 .ss-chat-input { background: transparent; border: none; width: 100%; color: #dcddde; padding: 0 10px; font-size:1rem; }
 .ss-chat-input:focus { outline: none; box-shadow:none; }
 
-.ringing { animation: pulse 0.5s infinite; color: #3ba55c !important; }
-@keyframes pulse { 0%{transform:scale(1);} 50%{transform:scale(1.2);} 100%{transform:scale(1);} }
+/* Service Station Approvals additions */
+.ss-queue-btn { background: #3ba55c; color: white; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;}
+.ss-queue-btn.reject { background: #ed4245; }
+.ss-queue-btn:hover { filter: brightness(1.2); }
 
 /* VIP Jump Request Modal */
 .vip-grid-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; max-height: 50vh; overflow-y: auto; padding-right: 1rem; margin-top: 1.5rem; }
@@ -189,7 +205,7 @@ input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 10px v
 .vcard-works { display: flex; gap: 5px; justify-content: center; overflow: hidden; }
 .vcard-img { width: 40px; height: 40px; object-fit: cover; border-radius: 6px; mix-blend-mode: screen; border:1px solid #333;}
 
-/* Floating VIP Inbox (Instagram Style) & Icons */
+/* Floating Instagram Style Notification Cluster */
 .bottom-right-cluster { position: fixed; bottom: 30px; right: 30px; z-index: 9000; display:flex; flex-direction:column; gap:15px; align-items:center; }
 .social-floating { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(45deg, #f093fb, #f5576c); display: flex; justify-content: center; align-items: center; color: #fff; font-size: 1.8rem; box-shadow: 0 5px 20px rgba(245, 87, 108, 0.4); transition: var(--transition); text-decoration:none; }
 .social-floating:hover { transform: scale(1.1); box-shadow: 0 5px 25px rgba(245, 87, 108, 0.8); }
@@ -198,44 +214,64 @@ input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 10px v
 #vip-floating-trigger:hover { transform: scale(1.1) rotate(-10deg); cursor: pointer !important; }
 
 .copyright-footer { position: fixed; bottom: 20px; left: 20px; color: rgba(255,255,255,0.4); font-size: 0.8rem; z-index: 8000; font-weight:bold; letter-spacing:1px; }
-
 .notification-badge { position: absolute; top: -5px; right: -5px; width: 22px; height: 22px; border-radius: 50%; background: #ff0000; font-size: 0.8rem; font-weight: bold; display: flex; justify-content: center; align-items: center; border: 2px solid #fff; }
 
-#vip-inbox-window { position: fixed; bottom: 110px; right: 30px; z-index: 9050; width: 800px; height: 500px; background: rgba(10,10,12,0.95); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); display: flex; flex-direction: column; overflow: hidden; transition: opacity 0.3s ease, transform 0.3s ease; }
+/* =========================================
+   📱 INSTAGRAM-STYLE DIRECTBOX
+   ========================================= */
+#vip-inbox-window { 
+    position: fixed; bottom: 110px; right: 30px; z-index: 9050; width: 850px; height: 550px; 
+    background: #000000; /* Pure Black IG Dark Mode */
+    border: 1px solid #262626; /* IG Dark border */
+    border-radius: 12px; 
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8); 
+    display: flex; flex-direction: column; overflow: hidden; 
+    transition: opacity 0.3s ease, transform 0.3s ease; 
+}
 #vip-inbox-window.hidden { opacity: 0; pointer-events: none; transform: translateY(20px); display:block !important;}
 
-.vip-inbox-header { height: 50px; background: rgba(0,0,0,0.5); padding: 0 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; color: #fff; font-weight: bold; font-size: 1.1rem; cursor: grab !important; }
+.vip-inbox-header { 
+    height: 60px; background: #000000; padding: 0 1.5rem; 
+    border-bottom: 1px solid #262626; 
+    display: flex; justify-content: space-between; align-items: center; 
+    color: #fff; font-weight: bold; font-size: 1.1rem; cursor: grab !important; 
+}
 .vip-inbox-header:active { cursor: grabbing !important; }
 
-.vip-inbox-controls button { background: none; border: none; color: #a0a0b0; font-size: 1.2rem; cursor: pointer !important; margin-left: 10px; transition: 0.2s; }
-.vip-inbox-controls button:hover { color: #fff; transform: scale(1.2); }
+.vip-inbox-controls button { background: none; border: none; color: #fff; font-size: 1.4rem; cursor: pointer !important; margin-left: 15px; transition: 0.2s; }
+.vip-inbox-controls button:hover { color: var(--accent); transform: scale(1.1); }
 
-.vip-inbox-body { display: flex; flex: 1; overflow: hidden; }
-.inbox-dm-list { width: 250px; border-right: 1px solid rgba(255,255,255,0.05); overflow-y: auto; background: rgba(0,0,0,0.2); }
-.inbox-dm-item { display: flex; align-items: center; gap: 15px; padding: 12px; cursor: pointer !important; transition: 0.2s; border-bottom: 1px solid rgba(255,255,255,0.02);}
-.inbox-dm-item:hover, .inbox-dm-item.active { background: rgba(255,255,255,0.08); }
-.inbox-dm-item .online-dot { border: 2px solid rgba(10,10,12,0.95) !important; }
+.vip-inbox-body { display: flex; flex: 1; overflow: hidden; background: #000; }
+.inbox-dm-list { width: 300px; border-right: 1px solid #262626; overflow-y: auto; background: #000; padding-top:10px; }
+.inbox-dm-item { display: flex; align-items: center; gap: 12px; padding: 10px 20px; cursor: pointer !important; transition: 0.2s; border:none;}
+.inbox-dm-item:hover, .inbox-dm-item.active { background: #121212; }
+.inbox-dm-item .online-dot { border: 2px solid #000 !important; }
 
-.inbox-chat-area { flex: 1; display: flex; flex-direction: column; background: transparent; }
-.inbox-messages { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-.inbox-input-zone { height: 60px; border-top: 1px solid rgba(255,255,255,0.05); padding: 0 15px; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.3); }
-#floating-input { flex: 1; background: transparent; border: none; color: #fff; padding: 8px 0; outline: none; box-shadow:none;}
-.inbox-icon { background: none; border: none; color: #a0a0b0; font-size: 1.4rem; cursor: pointer !important; transition:0.2s;}
+.inbox-chat-area { flex: 1; display: flex; flex-direction: column; background: #000; }
+.inbox-messages { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+
+/* IG Pill Shaped Input Bar */
+.inbox-input-zone { padding: 15px; display: flex; align-items: center; gap: 12px; background: #000; }
+#floating-form { 
+    flex: 1; display: flex; align-items:center;
+    background: #262626; /* IG Pill Background */
+    border-radius: 24px;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+}
+#floating-form:focus-within { border-color: #555; }
+#floating-input { flex: 1; background: transparent; border: none; color: #fff; padding: 0; outline: none; font-size:0.95rem; }
+
+.inbox-icon { background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer !important; transition:0.2s; padding:0 5px;}
 .inbox-icon:hover { color: var(--accent); }
 
-/* Service Station Approvals additions */
-.ss-queue-btn { background: #3ba55c; color: white; border:none; padding:8px 12px; border-radius:4px; font-weight:bold; cursor:pointer;}
-.ss-queue-btn.reject { background: #ed4245; }
-.ss-queue-btn:hover { filter: brightness(1.2); }
-
-/* Message Bubble specific overrides */
-.msg-bubble { max-width: 70%; padding: 0.8rem 1rem; border-radius: 18px; word-wrap: break-word; color:#fff; font-size:0.95rem; }
-.msg-bubble.owner { background: linear-gradient(135deg, #8a2387, #e94057); align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 5px 15px rgba(233,64,87,0.3); }
-.msg-bubble.client { background: #2f3136; border: 1px solid var(--glass-border); align-self: flex-start; border-bottom-left-radius: 4px; }
-
+/* IG Message Bubbles */
+.msg-bubble { max-width: 65%; padding: 12px 18px; word-wrap: break-word; color:#fff; font-size:0.95rem; }
+.msg-bubble.owner { background: linear-gradient(135deg, #a334fa, #3797f0); align-self: flex-end; border-radius: 22px; border-bottom-right-radius: 4px; box-shadow: none; }
+.msg-bubble.client { background: #262626; border: none; align-self: flex-start; border-radius: 22px; border-bottom-left-radius: 4px; }
 
 /* =========================================
-   📱 MOBILE RESPONSIVENESS (PHONES & TABLETS)
+   📱 MOBILE RESPONSIVENESS
    ========================================= */
 @media (max-width: 768px) {
     .nav-container { flex-direction: column; padding: 0.5rem; gap: 10px; }
@@ -254,9 +290,9 @@ input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 10px v
     .ss-channels { width: 100%; height: 150px; border-right: none; border-bottom: 1px solid rgba(0,0,0,0.2); }
     .ss-main { height: 500px; }
     .ss-chat-input { font-size: 0.8rem; }
+    
     #vip-inbox-window { width: 90%; right: 5%; bottom: 100px; height: 60vh; }
     .vip-inbox-body { flex-direction: column; }
-    .inbox-dm-list { width: 100%; height: 100px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; overflow-x: auto; flex-direction: row; }
+    .inbox-dm-list { width: 100%; height: 100px; border-right: none; border-bottom: 1px solid #262626; display: flex; overflow-x: auto; flex-direction: row; }
     .modal-content { margin: 1rem; padding: 1.5rem; }
-    .glass-btn-floating { bottom: 100px; left: 10px; }
 }
