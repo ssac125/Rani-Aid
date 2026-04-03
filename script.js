@@ -89,6 +89,9 @@ const loadAssets = () => {
 const updateUI = () => {
     const loginBtn = document.getElementById('btn-login-modal');
     const userProfile = document.getElementById('user-profile');
+    const floatTrigger = document.getElementById('vip-floating-trigger');
+    const beCreatorBtn = document.getElementById('btn-be-creator');
+
     if (currentUser && userProfile) {
         if(loginBtn) loginBtn.style.display = 'none';
         userProfile.classList.remove('hidden');
@@ -96,27 +99,30 @@ const updateUI = () => {
         
         const badge = document.getElementById('role-badge');
         const vipIcon = document.getElementById('global-vip-badge');
-        const floatTrigger = document.getElementById('vip-floating-trigger');
         
         badge.textContent = currentUser.role.toUpperCase();
+        
+        // EVERYONE gets the floating chat trigger now
+        floatTrigger.classList.remove('hidden');
+
         if (currentUser.role === 'owner' || currentUser.role === 'vip') {
             if (currentUser.role === 'owner') {
                 badge.style.background = 'linear-gradient(45deg, #f093fb, #f5576c)';
-                document.getElementById('nav-monitor').classList.remove('hidden'); // Owner specific
+                document.getElementById('nav-monitor').classList.remove('hidden');
             } else {
                 badge.style.background = 'linear-gradient(45deg, #f6d365, #fda085)';
             }
             vipIcon.classList.remove('hidden');
-            floatTrigger.classList.remove('hidden');
             document.getElementById('nav-vip').classList.remove('hidden');
+            if(beCreatorBtn) beCreatorBtn.classList.add('hidden'); // Hide Be Creator if already VIP
         } else {
             badge.style.background = '#555';
             vipIcon.classList.add('hidden');
-            floatTrigger.classList.add('hidden');
-            const ibx = document.getElementById('vip-inbox-window'); if(ibx) ibx.classList.add('hidden');
+            document.getElementById('nav-vip').classList.add('hidden');
+            if(beCreatorBtn) beCreatorBtn.classList.remove('hidden'); // Show for normal users
         }
 
-        document.getElementById('nav-inbox').classList.remove('hidden'); // Regular clients also see Station
+        document.getElementById('nav-inbox').classList.remove('hidden');
         checkPendingRequests();
     } else {
         if(loginBtn) loginBtn.style.display = 'block';
@@ -124,8 +130,10 @@ const updateUI = () => {
         const v = document.getElementById('nav-vip'); if(v) v.classList.add('hidden');
         const i = document.getElementById('nav-inbox'); if(i) i.classList.add('hidden');
         const m = document.getElementById('nav-monitor'); if(m) m.classList.add('hidden');
-        document.getElementById('vip-floating-trigger').classList.add('hidden');
+        
+        floatTrigger.classList.add('hidden');
         document.getElementById('vip-inbox-window').classList.add('hidden');
+        if(beCreatorBtn) beCreatorBtn.classList.remove('hidden'); // Show for non-logged in users so they can click and be told to sign in
     }
 };
 
@@ -157,14 +165,26 @@ document.querySelectorAll('.slider-container').forEach(c => {
     if(n) n.addEventListener('click', () => track.scrollBy({ left: 300, behavior: 'smooth'}));
 });
 
-// VIP Activation
-const activateBtn = document.getElementById('btn-activate-vip');
-if(activateBtn) {
-    activateBtn.addEventListener('click', () => {
-        if(!currentUser) return alert("Sign In first!");
-        const code = document.getElementById('license-input').value.trim();
+// "Be Creator" Floating Button Logic
+const btnBeCreator = document.getElementById('btn-be-creator');
+const creatorModal = document.getElementById('creator-modal');
+if(btnBeCreator) {
+    btnBeCreator.addEventListener('click', () => {
+        if(!currentUser) return alert("Please Sign In first to upgrade your account!");
+        creatorModal.style.display = 'flex';
+    });
+}
+if(document.getElementById('close-creator')) {
+    document.getElementById('close-creator').addEventListener('click', () => creatorModal.style.display = 'none');
+}
+
+// Modal VIP Activation Logic
+const btnModalActivate = document.getElementById('btn-modal-activate');
+if(btnModalActivate) {
+    btnModalActivate.addEventListener('click', () => {
+        const code = document.getElementById('modal-license-input').value.trim();
         const codes = JSON.parse(localStorage.getItem('rani_vip_codes'));
-        const msg = document.getElementById('vip-status-msg');
+        const msg = document.getElementById('modal-vip-status');
         
         if(codes.includes(code)) {
             currentUser.role = "vip";
@@ -172,13 +192,19 @@ if(activateBtn) {
             const users = JSON.parse(localStorage.getItem('rani_users'));
             const idx = users.findIndex(u => u.email === currentUser.email);
             if(idx > -1) { users[idx].role = 'vip'; localStorage.setItem('rani_users', JSON.stringify(users)); }
-            msg.textContent = "VIP PASSKEY GRANTED! You are now a Creator."; msg.style.color="#00ff88";
-            updateUI();
+            
+            msg.textContent = "VIP PASSKEY GRANTED! You are now a Creator."; 
+            msg.style.color="#00ff88";
+            setTimeout(() => {
+                creatorModal.style.display = 'none';
+                updateUI();
+            }, 1500);
         } else {
             msg.textContent = "Invalid VIP Passkey."; msg.style.color="#ff4444";
         }
     });
 }
+
 
 // Authentication
 if(document.getElementById('btn-login-modal')) document.getElementById('btn-login-modal').addEventListener('click', () => document.getElementById('auth-modal').style.display = 'flex');
@@ -589,35 +615,59 @@ if(vipHead) {
     document.addEventListener('mouseup', () => { isDragging = false; });
 }
 
+// Rewritten Instagram-Style Direct Box Logic
 window.loadVIPInbox = () => {
-    if(!currentUser || (currentUser.role !== 'vip' && currentUser.role !== 'owner')) return;
+    if(!currentUser) return; // Works for ALL logged in users now
     const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
     const users = JSON.parse(localStorage.getItem('rani_users') || '[]');
     
     let contacts = new Set();
+
+    // 1. Force populate all VIPs/Creators (so anyone can select them to chat)
+    users.filter(u => u.role === 'vip' || u.role === 'owner').forEach(v => {
+        if(v.email !== currentUser.email) contacts.add(v.email);
+    });
+
+    // 2. Add anyone you have previously chatted with
     msgList.filter(m => m.status === 'ACTIVE').forEach(m => {
         if(m.sender === currentUser.email) contacts.add(m.receiver);
         if(m.receiver === currentUser.email) contacts.add(m.sender);
     });
 
     const clientArr = Array.from(contacts);
+    
+    // Sort logic: Online users appear at the top
+    clientArr.sort((a, b) => {
+        const ua = users.find(u => u.email === a);
+        const ub = users.find(u => u.email === b);
+        const oa = ua && (Date.now() - ua.lastActive) < 60000 ? 1 : 0;
+        const ob = ub && (Date.now() - ub.lastActive) < 60000 ? 1 : 0;
+        return ob - oa;
+    });
+
     let navHTML = '';
     clientArr.forEach(c => {
         const userObj = users.find(u => u.email === c);
         const uEmail = c.split('@')[0];
         const isOnline = userObj ? (Date.now() - userObj.lastActive) < 60000 : false;
         const isActiveClass = (c === activeChatClient) ? 'active' : '';
+        const roleMark = (userObj && (userObj.role === 'vip' || userObj.role === 'owner')) ? 
+            '<i class="ph-fill ph-check-circle" title="VIP Creator" style="color:#00ff88; margin-left:4px;"></i>' : '';
+
         navHTML += `
             <div class="inbox-dm-item ${isActiveClass}" onclick="window.selectSsClient('${c}')">
                 <div class="ss-dm-avatar" style="width:40px;height:40px;flex-shrink:0;">
                     ${uEmail.charAt(0).toUpperCase()}
-                    ${isOnline ? '<div class="online-dot" style="position:absolute;bottom:0;right:0;width:10px;height:10px;background:#3ba55c;border-radius:50%;"></div>':''}
+                    ${isOnline ? '<div class="online-dot" style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:#3ba55c;border-radius:50%;"></div>':''}
                 </div>
-                <div style="color:#fff;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${uEmail}</div>
+                <div style="color:#fff;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; flex:1;">
+                    ${uEmail} ${roleMark}
+                </div>
             </div>
         `;
     });
-    document.getElementById('floating-dm-list').innerHTML = navHTML || `<p style="text-align:center;padding:10px;color:#666;">No active DMs.</p>`;
+    
+    document.getElementById('floating-dm-list').innerHTML = navHTML || `<p style="text-align:center;padding:10px;color:#666;">No users available.</p>`;
     renderChatCore('floating');
     checkPendingRequests();
 };
