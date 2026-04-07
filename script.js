@@ -19,7 +19,7 @@ if (!localStorage.getItem('rani_vip_codes')) {
 }
 
 // Global Variables
-let currentUser = JSON.parse(sessionStorage.getItem('current_user')) || null;
+let currentUser = JSON.parse(localStorage.getItem('rani_saved_login')) || null;
 let isSignupMode = false;
 let activeChatClient = null;
 let currentServiceItem = null;
@@ -33,10 +33,10 @@ window.addEventListener('firebaseReady', () => {
         let liveUsers = [];
         snapshot.forEach(doc => liveUsers.push(doc.data()));
         localStorage.setItem('rani_users', JSON.stringify(liveUsers)); // Keep a local copy for quick rendering
-        
-        if(currentUser && currentUser.role === 'owner') window.loadAdminMonitor();
+
+        if (currentUser && currentUser.role === 'owner') window.loadAdminMonitor();
         const win = document.getElementById('vip-inbox-window');
-        if(win && !win.classList.contains('hidden')) window.loadVIPInbox();
+        if (win && !win.classList.contains('hidden')) window.loadVIPInbox();
     });
 
     // 2. Listen to all MESSAGES in the cloud
@@ -49,23 +49,23 @@ window.addEventListener('firebaseReady', () => {
         localStorage.setItem('rani_messages', JSON.stringify(liveMessages));
 
         // When a new message comes in, refresh the UI automatically!
-        if(currentUser) {
+        if (currentUser) {
             checkPendingRequests();
             window.loadServiceStation();
             const win = document.getElementById('vip-inbox-window');
-            if(win && !win.classList.contains('hidden')) window.loadVIPInbox();
+            if (win && !win.classList.contains('hidden')) window.loadVIPInbox();
         }
     });
 });
 
 
 const pingOnlineStatus = () => {
-    if(!currentUser) return;
+    if (!currentUser) return;
     currentUser.lastActive = Date.now();
-    sessionStorage.setItem('current_user', JSON.stringify(currentUser));
-    
+    localStorage.setItem('rani_saved_login', JSON.stringify(currentUser));
+
     // Update Firebase online status
-    if(window.firebaseDB) {
+    if (window.firebaseDB) {
         const emailSafe = currentUser.email.replace(/[^a-zA-Z0-9]/g, '');
         window.fbSetDoc(window.fbDoc(window.firebaseDB, "users", emailSafe), currentUser, { merge: true });
     }
@@ -80,9 +80,9 @@ const loadAssets = () => {
     const assets = JSON.parse(localStorage.getItem('rani_assets'));
     const spritesTrack = document.getElementById('sprites-track');
     const effectsTrack = document.getElementById('effects-track');
-    
-    if(spritesTrack) spritesTrack.innerHTML = '';
-    if(effectsTrack) effectsTrack.innerHTML = '';
+
+    if (spritesTrack) spritesTrack.innerHTML = '';
+    if (effectsTrack) effectsTrack.innerHTML = '';
 
     assets.forEach(asset => {
         const cardHtml = `
@@ -110,13 +110,13 @@ const updateUI = () => {
     const beCreatorBtn = document.getElementById('btn-be-creator');
 
     if (currentUser && userProfile) {
-        if(loginBtn) loginBtn.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'none';
         userProfile.classList.remove('hidden');
         document.getElementById('user-email-display').textContent = currentUser.email.split('@')[0];
-        
+
         const badge = document.getElementById('role-badge');
         const vipIcon = document.getElementById('global-vip-badge');
-        
+
         badge.textContent = currentUser.role.toUpperCase();
         floatTrigger.classList.remove('hidden');
 
@@ -129,43 +129,43 @@ const updateUI = () => {
             }
             vipIcon.classList.remove('hidden');
             document.getElementById('nav-vip').classList.remove('hidden');
-            if(beCreatorBtn) beCreatorBtn.classList.add('hidden');
+            if (beCreatorBtn) beCreatorBtn.classList.add('hidden');
         } else {
             badge.style.background = '#555';
             vipIcon.classList.add('hidden');
             document.getElementById('nav-vip').classList.add('hidden');
-            if(beCreatorBtn) beCreatorBtn.classList.remove('hidden');
+            if (beCreatorBtn) beCreatorBtn.classList.remove('hidden');
         }
 
         document.getElementById('nav-inbox').classList.remove('hidden');
         checkPendingRequests();
     } else {
-        if(loginBtn) loginBtn.style.display = 'block';
-        if(userProfile) userProfile.classList.add('hidden');
-        const v = document.getElementById('nav-vip'); if(v) v.classList.add('hidden');
-        const i = document.getElementById('nav-inbox'); if(i) i.classList.add('hidden');
-        const m = document.getElementById('nav-monitor'); if(m) m.classList.add('hidden');
-        
+        if (loginBtn) loginBtn.style.display = 'block';
+        if (userProfile) userProfile.classList.add('hidden');
+        const v = document.getElementById('nav-vip'); if (v) v.classList.add('hidden');
+        const i = document.getElementById('nav-inbox'); if (i) i.classList.add('hidden');
+        const m = document.getElementById('nav-monitor'); if (m) m.classList.add('hidden');
+
         floatTrigger.classList.add('hidden');
         document.getElementById('vip-inbox-window').classList.add('hidden');
-        if(beCreatorBtn) beCreatorBtn.classList.remove('hidden'); 
+        if (beCreatorBtn) beCreatorBtn.classList.remove('hidden');
     }
 };
 
 const switchTab = (tabId) => {
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    
+
     document.querySelector(`.nav-item[data-tab="${tabId}"]`)?.classList.add('active');
     const content = document.getElementById(tabId);
-    if(content) content.classList.add('active');
+    if (content) content.classList.add('active');
 
     const bg = document.getElementById('global-bg');
-    if(tabId === 'home') bg.classList.remove('blurred');
+    if (tabId === 'home') bg.classList.remove('blurred');
     else bg.classList.add('blurred');
 
-    if(tabId === 'inbox') window.loadServiceStation();
-    if(tabId === 'monitor') window.loadAdminMonitor();
+    if (tabId === 'inbox') window.loadServiceStation();
+    if (tabId === 'monitor') window.loadAdminMonitor();
 };
 
 document.querySelectorAll('.nav-item').forEach(item => {
@@ -176,57 +176,57 @@ document.querySelectorAll('.slider-container').forEach(c => {
     const track = c.querySelector('.slider-track');
     const p = c.querySelector('.prev-btn');
     const n = c.querySelector('.next-btn');
-    if(p) p.addEventListener('click', () => track.scrollBy({ left: -300, behavior: 'smooth'}));
-    if(n) n.addEventListener('click', () => track.scrollBy({ left: 300, behavior: 'smooth'}));
+    if (p) p.addEventListener('click', () => track.scrollBy({ left: -300, behavior: 'smooth' }));
+    if (n) n.addEventListener('click', () => track.scrollBy({ left: 300, behavior: 'smooth' }));
 });
 
 // "Be Creator" Logic
 const btnBeCreator = document.getElementById('btn-be-creator');
 const creatorModal = document.getElementById('creator-modal');
-if(btnBeCreator) {
+if (btnBeCreator) {
     btnBeCreator.addEventListener('click', () => {
-        if(!currentUser) return alert("Please Sign In first to upgrade your account!");
+        if (!currentUser) return alert("Please Sign In first to upgrade your account!");
         creatorModal.style.display = 'flex';
     });
 }
-if(document.getElementById('close-creator')) {
+if (document.getElementById('close-creator')) {
     document.getElementById('close-creator').addEventListener('click', () => creatorModal.style.display = 'none');
 }
 
 const btnModalActivate = document.getElementById('btn-modal-activate');
-if(btnModalActivate) {
+if (btnModalActivate) {
     btnModalActivate.addEventListener('click', () => {
         const code = document.getElementById('modal-license-input').value.trim();
         const codes = JSON.parse(localStorage.getItem('rani_vip_codes'));
         const msg = document.getElementById('modal-vip-status');
-        
-        if(codes.includes(code)) {
+
+        if (codes.includes(code)) {
             currentUser.role = "vip";
-            sessionStorage.setItem('current_user', JSON.stringify(currentUser));
-            
+            localStorage.setItem('rani_saved_login', JSON.stringify(currentUser));
+
             // Sync new VIP role to Firebase
-            if(window.firebaseDB) {
+            if (window.firebaseDB) {
                 const emailSafe = currentUser.email.replace(/[^a-zA-Z0-9]/g, '');
                 window.fbSetDoc(window.fbDoc(window.firebaseDB, "users", emailSafe), currentUser, { merge: true });
             }
-            
-            msg.textContent = "VIP PASSKEY GRANTED! You are now a Creator."; 
-            msg.style.color="#00ff88";
+
+            msg.textContent = "VIP PASSKEY GRANTED! You are now a Creator.";
+            msg.style.color = "#00ff88";
             setTimeout(() => {
                 creatorModal.style.display = 'none';
                 updateUI();
             }, 1500);
         } else {
-            msg.textContent = "Invalid VIP Passkey."; msg.style.color="#ff4444";
+            msg.textContent = "Invalid VIP Passkey."; msg.style.color = "#ff4444";
         }
     });
 }
 
 // Authentication Sync to Firebase
-if(document.getElementById('btn-login-modal')) document.getElementById('btn-login-modal').addEventListener('click', () => document.getElementById('auth-modal').style.display = 'flex');
-if(document.querySelector('#auth-modal .close-modal')) document.querySelector('#auth-modal .close-modal').addEventListener('click', () => document.getElementById('auth-modal').style.display = 'none');
+if (document.getElementById('btn-login-modal')) document.getElementById('btn-login-modal').addEventListener('click', () => document.getElementById('auth-modal').style.display = 'flex');
+if (document.querySelector('#auth-modal .close-modal')) document.querySelector('#auth-modal .close-modal').addEventListener('click', () => document.getElementById('auth-modal').style.display = 'none');
 
-if(document.getElementById('auth-toggle')) {
+if (document.getElementById('auth-toggle')) {
     document.getElementById('auth-toggle').addEventListener('click', () => {
         isSignupMode = !isSignupMode;
         document.getElementById('auth-modal-title').innerHTML = isSignupMode ? "Sign <span>Up</span>" : "Sign <span>In</span>";
@@ -235,7 +235,7 @@ if(document.getElementById('auth-toggle')) {
     });
 }
 
-if(document.getElementById('auth-form')) {
+if (document.getElementById('auth-form')) {
     document.getElementById('auth-form').addEventListener('submit', (e) => {
         e.preventDefault();
         const em = document.getElementById('auth-email').value;
@@ -243,31 +243,31 @@ if(document.getElementById('auth-form')) {
         const users = JSON.parse(localStorage.getItem('rani_users') || '[]');
         const err = document.getElementById('auth-error');
 
-        if(isSignupMode) {
-            if(users.find(u => u.email === em)) { err.textContent = "Email used."; return; }
+        if (isSignupMode) {
+            if (users.find(u => u.email === em)) { err.textContent = "Email used."; return; }
             currentUser = { email: em, password: pw, role: "user", lastActive: Date.now() };
-            
+
             // Push new user to Firebase
-            if(window.firebaseDB) {
+            if (window.firebaseDB) {
                 const emailSafe = em.replace(/[^a-zA-Z0-9]/g, '');
                 window.fbSetDoc(window.fbDoc(window.firebaseDB, "users", emailSafe), currentUser);
             }
         } else {
             const f = users.find(u => u.email === em && u.password === pw);
-            if(!f) { err.textContent = "Invalid details."; return; }
+            if (!f) { err.textContent = "Invalid details."; return; }
             currentUser = f;
             pingOnlineStatus(); // Update last active in Firebase
         }
 
-        sessionStorage.setItem('current_user', JSON.stringify(currentUser));
+        localStorage.setItem('rani_saved_login', JSON.stringify(currentUser));
         document.getElementById('auth-modal').style.display = 'none';
         updateUI();
     });
 }
 
-if(document.getElementById('btn-logout')) {
+if (document.getElementById('btn-logout')) {
     document.getElementById('btn-logout').addEventListener('click', () => {
-        sessionStorage.removeItem('current_user');
+        localStorage.removeItem('rani_saved_login');
         currentUser = null;
         updateUI();
         window.location.reload();
@@ -276,29 +276,29 @@ if(document.getElementById('btn-logout')) {
 
 // "Ask for Service" Modal Logic
 window.openServiceModal = (item) => {
-    if(!currentUser) return alert("Please Sign In first so creators can reach you!");
+    if (!currentUser) return alert("Please Sign In first so creators can reach you!");
     currentServiceItem = item;
     document.getElementById('service-modal').style.display = 'flex';
 };
-if(document.getElementById('close-service')) document.getElementById('close-service').addEventListener('click', () => document.getElementById('service-modal').style.display = 'none');
+if (document.getElementById('close-service')) document.getElementById('close-service').addEventListener('click', () => document.getElementById('service-modal').style.display = 'none');
 
 document.getElementById('btn-next-jump')?.addEventListener('click', () => {
     document.getElementById('service-modal').style.display = 'none';
     const jm = document.getElementById('vip-jump-modal');
     jm.style.display = 'flex';
-    
+
     const users = JSON.parse(localStorage.getItem('rani_users') || '[]');
     const assets = JSON.parse(localStorage.getItem('rani_assets'));
     const vips = users.filter(u => u.role === 'vip' || u.role === 'owner');
-    
+
     const grid = document.getElementById('vip-grid-list');
     grid.innerHTML = vips.map(v => {
         const isOnline = (Date.now() - v.lastActive) < 60000;
         const timeDiff = Math.floor((Date.now() - v.lastActive) / 60000);
         const lastSeenStr = isOnline ? "Online Now" : (timeDiff > 1440 ? "Offline" : `Active ${timeDiff}m ago`);
         const dotClass = isOnline ? '' : 'offline';
-        
-        const vWorks = assets.filter(a => a.creatorCode === v.email).slice(0,3);
+
+        const vWorks = assets.filter(a => a.creatorCode === v.email).slice(0, 3);
         const imagesHtml = vWorks.map(w => `<img src="${w.url}" class="vcard-img" title="${w.name}">`).join('');
 
         return `
@@ -315,19 +315,19 @@ document.getElementById('btn-next-jump')?.addEventListener('click', () => {
         `;
     }).join('');
 });
-if(document.getElementById('close-jump')) document.getElementById('close-jump').addEventListener('click', () => document.getElementById('vip-jump-modal').style.display = 'none');
+if (document.getElementById('close-jump')) document.getElementById('close-jump').addEventListener('click', () => document.getElementById('vip-jump-modal').style.display = 'none');
 
 window.sendJumpRequest = (targetVipEmail) => {
     document.getElementById('vip-jump-modal').style.display = 'none';
-    saveMsg({ 
-        sender: currentUser.email, 
-        receiver: targetVipEmail, 
-        type: 'text', 
-        text: `[SERVICE REQUEST] Looking to commission a service based on: "${currentServiceItem ? currentServiceItem.name : 'your portfolio'}".`, 
+    saveMsg({
+        sender: currentUser.email,
+        receiver: targetVipEmail,
+        type: 'text',
+        text: `[SERVICE REQUEST] Looking to commission a service based on: "${currentServiceItem ? currentServiceItem.name : 'your portfolio'}".`,
         timestamp: Date.now(),
         status: 'PENDING'
     });
-    
+
     alert("Request has been sent. Please wait until they reply...");
     activeChatClient = targetVipEmail;
     switchTab('inbox');
@@ -336,13 +336,13 @@ window.sendJumpRequest = (targetVipEmail) => {
 // Admin Addons Base64 Upload
 document.getElementById('upload-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
-    if(!currentUser || (currentUser.role !== 'vip' && currentUser.role !== 'owner')) return alert("Not authorized.");
+    if (!currentUser || (currentUser.role !== 'vip' && currentUser.role !== 'owner')) return alert("Not authorized.");
     const fileInput = document.getElementById('upload-file');
-    if(!fileInput.files || !fileInput.files[0]) return alert("Please select a file.");
-    
+    if (!fileInput.files || !fileInput.files[0]) return alert("Please select a file.");
+
     const file = fileInput.files[0];
     const reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = function (evt) {
         const base64Str = evt.target.result;
         const newAsset = {
             id: Date.now(),
@@ -351,12 +351,12 @@ document.getElementById('upload-form')?.addEventListener('submit', (e) => {
             url: base64Str,
             rarity: document.getElementById('upload-rarity').value,
             quality: document.getElementById('upload-quality').value,
-            creatorCode: currentUser.email 
+            creatorCode: currentUser.email
         };
         const assets = JSON.parse(localStorage.getItem('rani_assets'));
         assets.push(newAsset);
         localStorage.setItem('rani_assets', JSON.stringify(assets));
-        
+
         alert("Portfolio Item Published!");
         e.target.reset();
         loadAssets();
@@ -367,13 +367,13 @@ document.getElementById('upload-form')?.addEventListener('submit', (e) => {
 
 // Admin Monitor logic
 window.loadAdminMonitor = () => {
-    if(!currentUser || currentUser.role !== 'owner') return;
+    if (!currentUser || currentUser.role !== 'owner') return;
     const users = JSON.parse(localStorage.getItem('rani_users') || '[]');
     const grid = document.getElementById('client-monitor-list');
-    if(!grid) return;
-    
+    if (!grid) return;
+
     grid.innerHTML = users.map(u => {
-        if(u.email === currentUser.email) return '';
+        if (u.email === currentUser.email) return '';
         const isOnline = (Date.now() - u.lastActive) < 60000;
         const timeDiff = Math.floor((Date.now() - u.lastActive) / 60000);
         const lastSeenStr = isOnline ? "Online Now" : (timeDiff > 1440 ? "Offline" : `Active ${timeDiff}m ago`);
@@ -397,25 +397,25 @@ window.loadAdminMonitor = () => {
 // Chat Logic & Real-time message dispatching
 // =======================================================
 const checkPendingRequests = () => {
-    if(!currentUser) return;
+    if (!currentUser) return;
     const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
     const pending = msgList.filter(m => m.receiver === currentUser.email && m.status === 'PENDING');
-    
+
     const floatBadge = document.querySelector('.notification-badge');
-    if(floatBadge) {
-        if(pending.length > 0) floatBadge.classList.remove('hidden');
+    if (floatBadge) {
+        if (pending.length > 0) floatBadge.classList.remove('hidden');
         else floatBadge.classList.add('hidden');
     }
 };
 
 window.loadServiceStation = () => {
-    if(!currentUser) return;
+    if (!currentUser) return;
     const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
     const users = JSON.parse(localStorage.getItem('rani_users') || '[]');
-    
+
     const pendingList = msgList.filter(m => m.receiver === currentUser.email && m.status === 'PENDING');
     let queueHTML = '';
-    
+
     if (currentUser.role === 'vip' || currentUser.role === 'owner') {
         const uniqueSenders = [...new Set(pendingList.map(p => p.sender))];
         uniqueSenders.forEach(senderEmail => {
@@ -433,14 +433,14 @@ window.loadServiceStation = () => {
         });
     }
 
-    if(queueHTML === '') queueHTML = '<div style="padding:10px; color:#555; text-align:center;">No requests in queue.</div>';
+    if (queueHTML === '') queueHTML = '<div style="padding:10px; color:#555; text-align:center;">No requests in queue.</div>';
     document.getElementById('ss-queue-list').innerHTML = queueHTML;
 
     let contacts = new Set();
     msgList.forEach(m => {
-        if(m.status === 'ACTIVE') {
-            if(m.sender === currentUser.email) contacts.add(m.receiver);
-            if(m.receiver === currentUser.email) contacts.add(m.sender);
+        if (m.status === 'ACTIVE') {
+            if (m.sender === currentUser.email) contacts.add(m.receiver);
+            if (m.receiver === currentUser.email) contacts.add(m.sender);
         }
     });
 
@@ -451,7 +451,7 @@ window.loadServiceStation = () => {
         const uEmail = c.split('@')[0];
         const isOnline = userObj ? (Date.now() - userObj.lastActive) < 60000 : false;
         navHTML += `
-            <div class="ss-dm-btn" title="${uEmail}" onclick="window.selectSsClient('${c}')" style="${c===activeChatClient?'border-radius:16px;':''}">
+            <div class="ss-dm-btn" title="${uEmail}" onclick="window.selectSsClient('${c}')" style="${c === activeChatClient ? 'border-radius:16px;' : ''}">
                 <div style="font-weight:bold;font-size:1.2rem; color:#fff;">${uEmail.charAt(0).toUpperCase()}</div>
                 ${isOnline ? '<div class="online-dot"></div>' : ''}
             </div>
@@ -464,21 +464,21 @@ window.loadServiceStation = () => {
 
 window.handleRequest = async (senderEmail, action) => {
     const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
-    
-    if(action === 'ACCEPT') {
+
+    if (action === 'ACCEPT') {
         // Send updates to Firebase
         msgList.forEach(m => {
-            if(m.sender === senderEmail && m.receiver === currentUser.email && m.status === 'PENDING') {
-                if(m.fbDocId && window.firebaseDB) window.fbUpdateDoc(window.fbDoc(window.firebaseDB, "messages", m.fbDocId), { status: 'ACTIVE' });
+            if (m.sender === senderEmail && m.receiver === currentUser.email && m.status === 'PENDING') {
+                if (m.fbDocId && window.firebaseDB) window.fbUpdateDoc(window.fbDoc(window.firebaseDB, "messages", m.fbDocId), { status: 'ACTIVE' });
             }
         });
         activeChatClient = senderEmail;
-        saveMsg({sender: currentUser.email, receiver: senderEmail, type:'text', text:'I have accepted your request! Let us discuss the details.', timestamp: Date.now(), status:'ACTIVE'});
+        saveMsg({ sender: currentUser.email, receiver: senderEmail, type: 'text', text: 'I have accepted your request! Let us discuss the details.', timestamp: Date.now(), status: 'ACTIVE' });
     } else {
         // Delete pending requests in Firebase
         msgList.forEach(m => {
-            if(m.sender === senderEmail && m.receiver === currentUser.email && m.status === 'PENDING') {
-                if(m.fbDocId && window.firebaseDB) window.fbDeleteDoc(window.fbDoc(window.firebaseDB, "messages", m.fbDocId));
+            if (m.sender === senderEmail && m.receiver === currentUser.email && m.status === 'PENDING') {
+                if (m.fbDocId && window.firebaseDB) window.fbDeleteDoc(window.fbDoc(window.firebaseDB, "messages", m.fbDocId));
             }
         });
     }
@@ -490,40 +490,40 @@ window.selectSsClient = (email) => {
     window.loadVIPInbox();
 };
 
-const renderChatCore = (targetPrefix) => { 
+const renderChatCore = (targetPrefix) => {
     const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
     let box;
-    if(targetPrefix === 'station') box = document.getElementById('station-messages');
+    if (targetPrefix === 'station') box = document.getElementById('station-messages');
     else box = document.getElementById('floating-messages');
-    if(!box) return;
+    if (!box) return;
 
     if (activeChatClient) {
-        if(targetPrefix==='station') document.getElementById('station-title').textContent = activeChatClient.split('@')[0];
-        
+        if (targetPrefix === 'station') document.getElementById('station-title').textContent = activeChatClient.split('@')[0];
+
         const pendingForMe = msgList.find(m => m.sender === activeChatClient && m.receiver === currentUser.email && m.status === 'PENDING');
         const pendingForThem = msgList.find(m => m.sender === currentUser.email && m.receiver === activeChatClient && m.status === 'PENDING');
-        
+
         const inputArea = targetPrefix === 'station' ? document.getElementById('station-input-area') : document.getElementById('floating-input').parentElement.parentElement;
-        
+
         if (pendingForMe || pendingForThem) {
             box.innerHTML = `<div class="ss-empty-state">Request is PENDING. You must Accept the request to start chatting.</div>`;
-            if(inputArea) inputArea.style.opacity = '0.5';
-            if(inputArea) inputArea.style.pointerEvents = 'none';
+            if (inputArea) inputArea.style.opacity = '0.5';
+            if (inputArea) inputArea.style.pointerEvents = 'none';
         } else {
-            if(inputArea) inputArea.style.opacity = '1';
-            if(inputArea) inputArea.style.pointerEvents = 'auto';
+            if (inputArea) inputArea.style.opacity = '1';
+            if (inputArea) inputArea.style.pointerEvents = 'auto';
 
-            const convo = msgList.filter(m => 
-                (m.sender === activeChatClient && m.receiver === currentUser.email) || 
+            const convo = msgList.filter(m =>
+                (m.sender === activeChatClient && m.receiver === currentUser.email) ||
                 (m.receiver === activeChatClient && m.sender === currentUser.email)
             ).filter(m => m.status === 'ACTIVE');
 
-            if(targetPrefix === 'station') {
+            if (targetPrefix === 'station') {
                 box.innerHTML = convo.map(m => {
                     const tE = m.sender.split('@')[0]; let contentHtml = '';
-                    if(m.type === 'text') contentHtml = `<p class="dc-msg-text">${m.text}</p>`;
-                    else if(m.type === 'image') contentHtml = `<img src="${m.url}" class="dc-msg-img" onclick="window.open(this.src)">`;
-                    else if(m.type === 'audio') contentHtml = `<div class="dc-msg-audio"><i class="ph-bold ph-play-circle" style="font-size:1.5rem; color:#fff;"></i> <span>Voice message (0:12)</span></div>`;
+                    if (m.type === 'text') contentHtml = `<p class="dc-msg-text">${m.text}</p>`;
+                    else if (m.type === 'image') contentHtml = `<img src="${m.url}" class="dc-msg-img" onclick="window.open(this.src)">`;
+                    else if (m.type === 'audio') contentHtml = `<div class="dc-msg-audio"><i class="ph-bold ph-play-circle" style="font-size:1.5rem; color:#fff;"></i> <span>Voice message (0:12)</span></div>`;
                     return `
                         <div class="dc-msg-box">
                             <div class="dc-msg-avatar">${tE.charAt(0).toUpperCase()}</div>
@@ -537,15 +537,23 @@ const renderChatCore = (targetPrefix) => {
                 box.innerHTML = convo.map(m => {
                     const isMe = m.sender === currentUser.email;
                     let contentHtml = '';
-                    if(m.type === 'text') contentHtml = m.text;
-                    else if(m.type === 'image') contentHtml = `<img src="${m.url}" style="max-width:150px; border-radius:8px;">`;
-                    else if(m.type === 'audio') contentHtml = `<i class="ph-bold ph-music-notes"></i> Voice Memo`;
-                    return `<div class="msg-bubble ${isMe ? 'owner' : 'client'}">${contentHtml}</div>`;
+                    if (m.type === 'text') contentHtml = m.text;
+                    else if (m.type === 'image') contentHtml = `<img src="${m.url}" style="max-width:150px; border-radius:8px;">`;
+                    else if (m.type === 'audio') contentHtml = `<i class="ph-bold ph-music-notes"></i> Voice Memo`;
+
+                    // Generate neat timestamp
+                    const timeStr = new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                    return `
+                    <div class="msg-row ${isMe ? 'me' : 'them'}">
+                        <div class="msg-bubble ${isMe ? 'owner' : 'client'}">${contentHtml}</div>
+                        <span class="msg-time">${timeStr}</span>
+                    </div>`;
                 }).join('');
             }
         }
     } else {
-        if(targetPrefix==='station') document.getElementById('station-title').textContent = "Select a Thread";
+        if (targetPrefix === 'station') document.getElementById('station-title').textContent = "Select a Thread";
         box.innerHTML = `<div class="ss-empty-state">No thread selected. Start working.</div>`;
     }
     box.scrollTop = box.scrollHeight;
@@ -558,17 +566,16 @@ const handleDbInput = (e, inputId) => {
     e.preventDefault();
     const inpTag = document.getElementById(inputId);
     const inp = inpTag.value.trim();
-    if(!inp || !activeChatClient) return;
+    if (!inp || !activeChatClient) return;
     saveMsg({ sender: currentUser.email, receiver: activeChatClient, type: 'text', text: inp, timestamp: Date.now(), status: 'ACTIVE' });
     inpTag.value = "";
 };
 
 const saveMsg = async (msgObj) => {
-    if(window.firebaseDB) {
+    if (window.firebaseDB) {
         try {
             await window.fbAddDoc(window.fbCollection(window.firebaseDB, "messages"), msgObj);
-            // We no longer need to call window.loadVIPInbox manually because onSnapshot does it automatically!
-        } catch(e) { console.error("Error sending message to Firebase:", e); }
+        } catch (e) { console.error("Error sending message to Firebase:", e); }
     }
 };
 
@@ -576,7 +583,7 @@ const floatTrig = document.getElementById('vip-floating-trigger');
 const vipWin = document.getElementById('vip-inbox-window');
 const vipHead = document.getElementById('vip-inbox-header');
 
-if(floatTrig) {
+if (floatTrig) {
     floatTrig.addEventListener('click', () => {
         vipWin.classList.remove('hidden');
         window.loadVIPInbox();
@@ -588,11 +595,11 @@ window.dockInbox = (pos) => {
     vipWin.style.top = '0px';
     vipWin.style.height = '100vh';
     vipWin.style.borderRadius = '0';
-    if(pos==='left') { vipWin.style.left = '0px'; vipWin.style.right = 'auto'; }
-    if(pos==='right'){ vipWin.style.right = '0px'; vipWin.style.left = 'auto'; }
+    if (pos === 'left') { vipWin.style.left = '0px'; vipWin.style.right = 'auto'; }
+    if (pos === 'right') { vipWin.style.right = '0px'; vipWin.style.left = 'auto'; }
 };
 
-if(vipHead) {
+if (vipHead) {
     let isDragging = false, startX, startY, startLeft, startTop;
     vipHead.addEventListener('mousedown', (e) => {
         isDragging = true;
@@ -605,7 +612,7 @@ if(vipHead) {
         vipWin.style.borderRadius = '16px';
     });
     document.addEventListener('mousemove', (e) => {
-        if(!isDragging) return;
+        if (!isDragging) return;
         const dx = e.clientX - startX;
         const dy = e.clientY - startY;
         vipWin.style.left = startLeft + dx + 'px';
@@ -615,23 +622,23 @@ if(vipHead) {
 }
 
 window.loadVIPInbox = () => {
-    if(!currentUser) return;
+    if (!currentUser) return;
     const msgList = JSON.parse(localStorage.getItem('rani_messages') || '[]');
     const users = JSON.parse(localStorage.getItem('rani_users') || '[]');
-    
+
     let contacts = new Set();
 
     users.filter(u => u.role === 'vip' || u.role === 'owner').forEach(v => {
-        if(v.email !== currentUser.email) contacts.add(v.email);
+        if (v.email !== currentUser.email) contacts.add(v.email);
     });
 
     msgList.filter(m => m.status === 'ACTIVE').forEach(m => {
-        if(m.sender === currentUser.email) contacts.add(m.receiver);
-        if(m.receiver === currentUser.email) contacts.add(m.sender);
+        if (m.sender === currentUser.email) contacts.add(m.receiver);
+        if (m.receiver === currentUser.email) contacts.add(m.sender);
     });
 
     const clientArr = Array.from(contacts);
-    
+
     clientArr.sort((a, b) => {
         const ua = users.find(u => u.email === a);
         const ub = users.find(u => u.email === b);
@@ -646,14 +653,14 @@ window.loadVIPInbox = () => {
         const uEmail = c.split('@')[0];
         const isOnline = userObj ? (Date.now() - userObj.lastActive) < 60000 : false;
         const isActiveClass = (c === activeChatClient) ? 'active' : '';
-        const roleMark = (userObj && (userObj.role === 'vip' || userObj.role === 'owner')) ? 
+        const roleMark = (userObj && (userObj.role === 'vip' || userObj.role === 'owner')) ?
             '<i class="ph-fill ph-check-circle" title="VIP Creator" style="color:#00ff88; margin-left:4px;"></i>' : '';
 
         navHTML += `
             <div class="inbox-dm-item ${isActiveClass}" onclick="window.selectSsClient('${c}')">
                 <div class="ss-dm-avatar" style="width:40px;height:40px;flex-shrink:0;">
                     ${uEmail.charAt(0).toUpperCase()}
-                    ${isOnline ? '<div class="online-dot" style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:#3ba55c;border-radius:50%;"></div>':''}
+                    ${isOnline ? '<div class="online-dot" style="position:absolute;bottom:0;right:0;width:12px;height:12px;background:#3ba55c;border-radius:50%;"></div>' : ''}
                 </div>
                 <div style="color:#fff;font-weight:bold;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; flex:1;">
                     ${uEmail} ${roleMark}
@@ -661,7 +668,7 @@ window.loadVIPInbox = () => {
             </div>
         `;
     });
-    
+
     document.getElementById('floating-dm-list').innerHTML = navHTML || `<p style="text-align:center;padding:10px;color:#666;">No users available.</p>`;
     renderChatCore('floating');
     checkPendingRequests();
@@ -671,24 +678,24 @@ const ibxPic = document.getElementById('floating-btn-pic');
 const ibxFile = document.getElementById('floating-file');
 const ibxVoice = document.getElementById('floating-btn-voice');
 
-if(ibxPic && ibxFile) {
+if (ibxPic && ibxFile) {
     ibxPic.addEventListener('click', () => ibxFile.click());
     ibxFile.addEventListener('change', (e) => {
-        if(!e.target.files[0] || !activeChatClient) return;
+        if (!e.target.files[0] || !activeChatClient) return;
         const reader = new FileReader();
-        reader.onload = function(evt) {
-            saveMsg({ sender: currentUser.email, receiver: activeChatClient, type: 'image', url: evt.target.result, timestamp: Date.now(), status:'ACTIVE' });
+        reader.onload = function (evt) {
+            saveMsg({ sender: currentUser.email, receiver: activeChatClient, type: 'image', url: evt.target.result, timestamp: Date.now(), status: 'ACTIVE' });
         };
         reader.readAsDataURL(e.target.files[0]);
     });
 }
-if(ibxVoice) {
+if (ibxVoice) {
     let rec = false;
     ibxVoice.addEventListener('click', () => {
-        if(!activeChatClient || rec) return;
+        if (!activeChatClient || rec) return;
         rec = true; ibxVoice.style.color = "#ff4444";
         setTimeout(() => {
-            saveMsg({ sender: currentUser.email, receiver: activeChatClient, type: 'audio', timestamp: Date.now(), status:'ACTIVE' });
+            saveMsg({ sender: currentUser.email, receiver: activeChatClient, type: 'audio', timestamp: Date.now(), status: 'ACTIVE' });
             ibxVoice.style.color = "#fff"; rec = false;
         }, 1500);
     });
@@ -696,13 +703,13 @@ if(ibxVoice) {
 
 const btnPic = document.getElementById('db-btn-pic');
 const fileInp = document.getElementById('db-file-upload');
-if(btnPic && fileInp) {
+if (btnPic && fileInp) {
     btnPic.addEventListener('click', () => fileInp.click());
     fileInp.addEventListener('change', (e) => {
-        if(!e.target.files[0] || !activeChatClient) return;
+        if (!e.target.files[0] || !activeChatClient) return;
         const reader = new FileReader();
-        reader.onload = function(evt) {
-            saveMsg({ sender: currentUser.email, receiver: activeChatClient, type: 'image', url: evt.target.result, timestamp: Date.now(), status:'ACTIVE' });
+        reader.onload = function (evt) {
+            saveMsg({ sender: currentUser.email, receiver: activeChatClient, type: 'image', url: evt.target.result, timestamp: Date.now(), status: 'ACTIVE' });
         };
         reader.readAsDataURL(e.target.files[0]);
     });
@@ -711,3 +718,43 @@ if(btnPic && fileInp) {
 // Setup
 loadAssets();
 updateUI();
+
+// ==========================================
+// THEME & SKIN PICKER LOGIC
+// ==========================================
+const themeBtn = document.getElementById('btn-chat-themes');
+const themeOverlay = document.getElementById('theme-picker-overlay');
+const inboxWindow = document.getElementById('vip-inbox-window');
+
+// Load saved preferences
+const savedPrefs = JSON.parse(localStorage.getItem('rani_chat_prefs')) || { color: 'purple', skin: 'solid' };
+if (inboxWindow) {
+    inboxWindow.setAttribute('data-color', savedPrefs.color);
+    inboxWindow.setAttribute('data-skin', savedPrefs.skin);
+}
+
+if (themeBtn && themeOverlay) {
+    themeBtn.addEventListener('click', () => {
+        themeOverlay.classList.toggle('hidden');
+    });
+
+    // Handle Color Clicks
+    document.querySelectorAll('.color-dot').forEach(dot => {
+        dot.addEventListener('click', (e) => {
+            const pickedColor = e.target.getAttribute('data-setcolor');
+            inboxWindow.setAttribute('data-color', pickedColor);
+            savedPrefs.color = pickedColor;
+            localStorage.setItem('rani_chat_prefs', JSON.stringify(savedPrefs));
+        });
+    });
+
+    // Handle Skin Clicks
+    document.querySelectorAll('.skin-options button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const pickedSkin = e.target.getAttribute('data-setskin');
+            inboxWindow.setAttribute('data-skin', pickedSkin);
+            savedPrefs.skin = pickedSkin;
+            localStorage.setItem('rani_chat_prefs', JSON.stringify(savedPrefs));
+        });
+    });
+}
