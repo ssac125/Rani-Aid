@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rani Aid | VIP Services</title>
     <meta name="description" content="Request custom VFX and sprites from VIP Creators.">
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="style.css?v=6">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </head>
+
 <body>
     <div class="background-overlay" id="global-bg"></div>
     <div class="noise" style="background-color: #612D53;"></div>
@@ -23,7 +25,7 @@
                     <i class="ph-bold ph-sparkle"></i>
                 </button>
             </div>
-            
+
             <ul class="nav-links">
                 <li class="nav-item" data-tab="sprites">Sprites</li>
                 <li class="nav-item" data-tab="effects">Effects</li>
@@ -51,7 +53,7 @@
             <div class="hero">
                 <h1 class="hero-title">Hire Legendary <span>Creators</span></h1>
                 <p class="hero-subtitle">Browse portfolios of high-quality sprites and VFX effects, and request custom work directly.</p>
-                
+
                 <div class="payment-overview glowing-box" style="margin-top:4rem; background: transparent; box-shadow: none; border-color: rgba(255,255,255,0.05);">
                     <h3 style="color:#a0a0b0; margin-bottom: 1rem; font-family:'Poppins', sans-serif; font-weight:400;">Secure Payment Methods</h3>
                     <div class="payment-cards-preview">
@@ -150,14 +152,15 @@
                 <div class="ss-main">
                     <div class="ss-chat-header">
                         <div style="display:flex; align-items:center; gap:10px;">
-                            <i class="ph-bold ph-hash"></i> <h3 id="station-title">Select a Request Thread</h3>
+                            <i class="ph-bold ph-hash"></i>
+                            <h3 id="station-title">Select a Request Thread</h3>
                         </div>
                     </div>
-                    
+
                     <div class="ss-messages" id="station-messages">
                         <div class="ss-empty-state">No request selected. Select a job to accept/reject or chat.</div>
                     </div>
-                    
+
                     <div class="ss-input-wrapper" id="station-input-area" style="opacity:0.5; pointer-events:none;">
                         <input type="file" id="station-file-upload" accept="image/*" style="display:none;">
                         <form id="station-form" style="flex:1;">
@@ -194,18 +197,38 @@
         </div>
     </div>
 
-    <div id="vip-inbox-window" class="hidden">
+    <div id="vip-inbox-window" class="hidden" data-color="purple" data-skin="solid">
         <div class="vip-inbox-header" id="vip-inbox-header">
             <div style="display:flex; align-items:center; gap:8px;">
                 <i class="ph-bold ph-instagram-logo"></i> <span>DirectBox</span>
             </div>
             <div class="vip-inbox-controls">
+                <button title="Chat Themes" id="btn-chat-themes"><i class="ph-bold ph-palette"></i></button>
                 <button title="Dock Left" onclick="dockInbox('left')"><i class="ph-bold ph-arrow-line-left"></i></button>
                 <button title="Dock Right" onclick="dockInbox('right')"><i class="ph-bold ph-arrow-line-right"></i></button>
-                <button title="Close" id="close-vip-inbox"><i class="ph-bold ph-x"></i></button>
+                <button title="Close" id="close-vip-inbox"><i class="ph-bold ph-caret-down"></i></button>
             </div>
         </div>
-        
+
+        <!-- Theme & Skin Picker Overlay -->
+        <div id="theme-picker-overlay" class="hidden">
+            <h4>Chat Colors</h4>
+            <div class="theme-options">
+                <div class="color-dot" data-setcolor="pink" style="background:#ff66b2;"></div>
+                <div class="color-dot" data-setcolor="purple" style="background:#a334fa;"></div>
+                <div class="color-dot" data-setcolor="soft-blue" style="background:#74b9ff;"></div>
+                <div class="color-dot" data-setcolor="grey" style="background:#888888;"></div>
+                <div class="color-dot" data-setcolor="dark-grey" style="background:#333333;"></div>
+                <div class="color-dot" data-setcolor="white" style="background:#ffffff;"></div>
+            </div>
+            <h4 style="margin-top:15px;">Bubble Skins</h4>
+            <div class="skin-options">
+                <button data-setskin="solid">Solid</button>
+                <button data-setskin="neon">Neon Cyberpunk</button>
+                <button data-setskin="glass">Frosted Glass</button>
+            </div>
+        </div>
+
         <div class="vip-inbox-body">
             <div class="inbox-dm-list" id="floating-dm-list"></div>
             <div class="inbox-chat-area">
@@ -303,7 +326,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Expose Firebase functions globally so your script.js can use them
         window.firebaseDB = db;
         window.fbCollection = collection;
         window.fbAddDoc = addDoc;
@@ -315,10 +337,10 @@
         window.fbUpdateDoc = updateDoc;
         window.fbDeleteDoc = deleteDoc;
 
-        // Fire an event to tell script.js that the cloud is ready!
         window.dispatchEvent(new Event('firebaseReady'));
     </script>
 
     <script src="script.js"></script>
 </body>
+
 </html>
